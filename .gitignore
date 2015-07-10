@@ -1,0 +1,9 @@
+*~
+*pyc
+*.swp
+.Python
+env
+.DS_Store
+.coverage
+coverage_report
+tor_async_util.egg-info
