@@ -1,8 +1,6 @@
 language: python
 python:
   - "2.7"
-services:
-  - couchdb
 install:
   - source cfg4dev
   - pip install coveralls
