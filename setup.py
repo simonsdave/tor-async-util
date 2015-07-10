@@ -40,6 +40,7 @@ setup(
         "tor_async_util",
     ],
     install_requires=[
+        "jsonschema==2.5.1",
     ],
     version=version,
     description="Tornado Async Utilities",
