@@ -1,0 +1,13 @@
+language: python
+python:
+  - "2.7"
+services:
+  - couchdb
+install:
+  - source cfg4dev
+  - pip install coveralls
+script:
+  - pep8
+  - flake8
+  - nosetests --with-coverage
+  - coveralls
