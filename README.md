@@ -1,4 +1,4 @@
-# tor-async-util [![Requirements Status](https://requires.io/github/simonsdave/tor-async-util/requirements.svg?branch=master)](https://requires.io/github/simonsdave/tor-async-util/requirements/?branch=master)
+# tor-async-util [![Requirements Status](https://requires.io/github/simonsdave/tor-async-util/requirements.svg?branch=master)](https://requires.io/github/simonsdave/tor-async-util/requirements/?branch=master) [![Coverage Status](https://coveralls.io/repos/simonsdave/tor-async-util/badge.svg?branch=master&service=github)](https://coveralls.io/github/simonsdave/tor-async-util?branch=master)
 
 tor-async-util contains a set of utilities that are useful
 when implementing RESTful APIs using [Tornado's](http://www.tornadoweb.org/en/stable/)
