@@ -1,0 +1,10 @@
+[run]
+branch = True
+include =
+        ./tor_async_util/*
+omit =
+        *tests*
+        *__init__*
+
+[html]
+directory = coverage_report
