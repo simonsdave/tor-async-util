@@ -5,10 +5,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - [unreleased]
 ### Added
-- ...
+- added is_libcurl_compiled_with_async_dns_resolver() - see
+[this](http://tornado.readthedocs.org/en/latest/httpclient.html)
+for why this is useful
 
 ### Changed
-- ...
+- log statements are now prefixed with tor_async_util
 
 ## [0.9.0] - [2015-07-10]
 - initial release
