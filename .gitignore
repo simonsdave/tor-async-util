@@ -6,4 +6,5 @@ env
 .DS_Store
 .coverage
 coverage_report
+dist
 tor_async_util.egg-info
