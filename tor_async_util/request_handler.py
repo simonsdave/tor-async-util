@@ -13,7 +13,7 @@ import jsonschema
 import tornado.web
 
 
-_logger = logging.getLogger(__name__)
+_logger = logging.getLogger("tor_async_util.%s" % __name__)
 
 """If a debug details header is included in a response,
 ```debug_details_header_name``` is the name of the HTTP
