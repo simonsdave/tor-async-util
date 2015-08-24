@@ -18,8 +18,30 @@ def is_libcurl_compiled_with_async_dns_resolver():
     to make sure that libcurl has been compiled with async DNS resolver.
     The programmatic approach to checking for libcurl being compiled
     with async DNS resolve is a mess of gory details. It was this mess
-    that drove the need for function. Specifically, this function implements
+    that drove the need for this function. Specifically, this function implements
     all the gory details so the caller doesn't have to worry about them!
+
+    This function is intended to be used in an application's mainline
+    in the following manner:
+
+        #!/usr/bin/env python
+
+        import logging
+
+        from tor_async_util import is_libcurl_compiled_with_async_dns_resolver
+
+        _logger = logging.getLogger(__name__)
+
+        if __name__ == "__main__":
+
+            if not is_libcurl_compiled_with_async_dns_resolver():
+                msg = (
+                    "libcurl does not appear to have been "
+                    "compiled with aysnc dns resolve which "
+                    "may result in timeouts on async requests"
+                )
+                _logger.warning(msg)
+
     If you really want to understand the details start with the following
     article:
 
