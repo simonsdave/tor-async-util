@@ -35,6 +35,7 @@ class TestCase(unittest.TestCase):
         self.assertTrue("pycurl" not in sys.modules)
         with self.assertRaises(ImportError):
             import pycurl
+            pycurl.never_get_here_but_fixes_flake8_error()
 
     def test_pycurl_import_not_available(self):
         with mock.patch(__name__ + ".tor_async_util._logger") as logger_patch:
