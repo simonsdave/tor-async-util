@@ -1,7 +1,8 @@
 """This module contains unit testings for __init__.py."""
 
-import unittest
+import signal
 import sys
+import unittest
 
 import mock
 
@@ -28,8 +29,8 @@ class MockPycurlInstaller(object):
         self._pycurl_patch.stop()
 
 
-class TestCase(unittest.TestCase):
-    """Abstract base class for all TestCase's in this file."""
+class IsLibCurlCompiledWithAsyncDNSResolverTestCase(unittest.TestCase):
+    """Unit tests for is_libcurl_compiled_with_async_dns_resolver()."""
 
     def setUp(self):
         self.assertTrue("pycurl" not in sys.modules)
@@ -94,3 +95,24 @@ class TestCase(unittest.TestCase):
                 self.assertEqual(
                     logger_patch.debug.call_args_list,
                     [])
+
+
+class InstallSigIntHandlerTestCase(unittest.TestCase):
+    """Unit tests for install_sigint_handler()."""
+
+    def test_install_sigint_handler_installs_sigint_handler(self):
+        signal_dot_signal_patch = mock.Mock()
+        with mock.patch("signal.signal", signal_dot_signal_patch):
+            tor_async_util.install_sigint_handler()
+        self.assertEquals(
+            signal_dot_signal_patch.call_args_list,
+            [mock.call(signal.SIGINT, tor_async_util._sigint_handler)])
+
+    def test_sigint_handler_calls_sys_dot_exit_with_zero(self):
+        sys_dot_exit_patch = mock.Mock()
+        with mock.patch("sys.exit", sys_dot_exit_patch):
+            frame = "what should this be?"
+            tor_async_util._sigint_handler(signal.SIGINT, frame)
+        self.assertEquals(
+            sys_dot_exit_patch.call_args_list,
+            [mock.call(0)])

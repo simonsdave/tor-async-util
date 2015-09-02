@@ -1,4 +1,6 @@
 import logging
+import signal
+import sys
 
 try:
     import pycurl
@@ -71,3 +73,28 @@ def is_libcurl_compiled_with_async_dns_resolver():
         msg = fmt % ex
         _logger.debug(msg)
         return False
+
+
+def _sigint_handler(signal_number, frame):
+    assert signal_number == signal.SIGINT
+    _logger.info("Shutting down ...")
+    sys.exit(0)
+
+
+def install_sigint_handler():
+    """This is a fit and finish type function. install_sigint_handler()
+    installs a handler that catches SIGINT signals and generates a
+    "nice" log message rather than the default handling of generating
+    and ugly/verbose stack trace.
+
+    This function is intended to be used in an application's mainline
+    in the following manner:
+
+        #!/usr/bin/env python
+
+        from tor_async_util import install_sigint_handler
+
+        if __name__ == "__main__":
+            install_sigint_handler()
+    """
+    signal.signal(signal.SIGINT, _sigint_handler)

@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 Format of this file follows [these](http://keepachangelog.com/) guidelines.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.0] - [2015-09-02]
+### Added
+- added install_sigint_handler()
+
 ## [1.0.0] - [2015-08-20]
 ### Added
 - added is_libcurl_compiled_with_async_dns_resolver() - see
