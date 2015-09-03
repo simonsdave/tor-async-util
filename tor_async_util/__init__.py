@@ -1,3 +1,4 @@
+import httplib
 import logging
 import signal
 import sys
@@ -6,6 +7,7 @@ try:
     import pycurl
 except ImportError:
     pass
+import tornado.web
 
 
 __version__ = "1.1.0"
@@ -98,3 +100,74 @@ def install_sigint_handler():
             install_sigint_handler()
     """
     signal.signal(signal.SIGINT, _sigint_handler)
+
+
+class DefaultRequestHandler(tornado.web.RequestHandler):
+    """This is the request handler that gets called when no other
+    request handler's url spec is matched for HEAD, GET, POST,
+    DELETE, PATCH, PUT & OPTIONS HTTP methods. This handler always
+    responds with a 404 (not found) status code, empty JSON
+    document and a JSON Content-Type for all methods except HEAD
+    when only a 404 is returned.
+
+    DefaultRequestHandler is expected to be used in the following
+    manner:
+
+        #!/usr/bin/env python
+
+        import tornado.web
+        from tor_async_util import DefaultRequestHandler
+
+        .
+        .
+        .
+
+        if __name__ == "__main__":
+
+            settings = {
+                "default_handler_class": DefaultRequestHandler,
+            }
+
+            handlers = [
+                ...
+            ]
+
+            app = tornado.web.Application(handlers=handlers, **settings)
+
+            .
+            .
+            .
+
+    :TODO: what about 'none standard' HTTP methods? is there a way
+    to consider leveraging use of RequestHandler.SUPPORTED_METHODS?
+    """
+
+    def head(self, *args, **kwargs):
+        pass
+
+    def get(self, *args, **kwargs):
+        pass
+
+    def post(self, *args, **kwargs):
+        pass
+
+    def delete(self, *args, **kwargs):
+        pass
+
+    def patch(self, *args, **kwargs):
+        pass
+
+    def put(self, *args, **kwargs):
+        pass
+
+    def options(self, *args, **kwargs):
+        pass
+
+    def prepare(self):
+        if self.request.method == "HEAD":
+            self.set_status(httplib.NOT_FOUND)
+            return
+
+        self.set_header("Content-Type", "application/json; charset=UTF-8")
+        self.write({})
+        self.set_status(httplib.NOT_FOUND)

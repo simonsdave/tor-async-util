@@ -1,10 +1,15 @@
 """This module contains unit testings for __init__.py."""
 
+import json
+import httplib
+import re
 import signal
 import sys
 import unittest
 
 import mock
+import tornado.testing
+import tornado.web
 
 import tor_async_util
 
@@ -116,3 +121,81 @@ class InstallSigIntHandlerTestCase(unittest.TestCase):
         self.assertEquals(
             sys_dot_exit_patch.call_args_list,
             [mock.call(0)])
+
+
+class SomethingHandler(tornado.web.RequestHandler):
+    """Used by DefaultHandlerTestCase."""
+
+    url_spec = r"/something"
+
+    def head(self, *args, **kwargs):
+        pass
+
+    def get(self, *args, **kwargs):
+        pass
+
+    def post(self, *args, **kwargs):
+        pass
+
+    def delete(self, *args, **kwargs):
+        pass
+
+    def patch(self, *args, **kwargs):
+        pass
+
+    def put(self, *args, **kwargs):
+        pass
+
+    def options(self, *args, **kwargs):
+        pass
+
+    def prepare(self):
+        self.set_status(httplib.OK)
+        self.finish()
+
+
+class DefaultHandlerTestCase(tornado.testing.AsyncHTTPTestCase):
+    """Unit tests for DefaultRequestHandler."""
+
+    other_url = "/else"
+
+    def get_app(self):
+        settings = {
+            "default_handler_class": tor_async_util.DefaultRequestHandler,
+        }
+
+        handlers = [
+            (SomethingHandler.url_spec, SomethingHandler),
+        ]
+
+        return tornado.web.Application(handlers=handlers, **settings)
+
+    def _test(self, method):
+        body = "" if method in ["POST", "PUT", "PATCH"] else None
+
+        response = self.fetch(SomethingHandler.url_spec, method=method, body=body)
+        self.assertEqual(response.code, httplib.OK)
+
+        self.assertNotEqual(type(self).other_url, SomethingHandler.url_spec)
+
+        response = self.fetch(type(self).other_url, method=method, body=body)
+        self.assertEqual(response.code, httplib.NOT_FOUND)
+        # since HEAD request never has a body
+        if method != "HEAD":
+            content_type = response.headers.get("Content-Type", None)
+            self.assertIsNotNone(content_type)
+            json_utf8_content_type_reg_ex = re.compile(
+                "^\s*application/json;\s+charset\=utf-{0,1}8\s*$",
+                re.IGNORECASE)
+            self.assertTrue(json_utf8_content_type_reg_ex.match(content_type))
+
+            self.assertEqual({}, json.loads(response.body))
+
+    def test_all_good(self):
+        self._test("GET")
+        self._test("POST")
+        self._test("DELETE")
+        self._test("PATCH")
+        self._test("PUT")
+        self._test("OPTIONS")
+        self._test("HEAD")
