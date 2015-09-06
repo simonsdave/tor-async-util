@@ -673,3 +673,43 @@ class SetStatusTestCase(tornado.testing.AsyncHTTPTestCase):
         with self.assertRaises(ValueError):
             request_handler.RequestHandler(
                 self.get_app(), mock.Mock()).set_status(1)
+
+
+class WriteErrorRequestHandler(request_handler.RequestHandler):
+    """This class is used by ```WriteErrorTestCase```."""
+
+    url_spec = r"/something"
+
+    @tornado.web.asynchronous
+    def get(self):
+        self.set_status(httplib.OK)
+        self.finish()
+
+
+class WriteErrorTestCase(tornado.testing.AsyncHTTPTestCase):
+    """A collection of unit tests for RequestHandler.write_error()"""
+
+    def get_app(self):
+        handlers = [
+            (
+                WriteErrorRequestHandler.url_spec,
+                WriteErrorRequestHandler
+            ),
+        ]
+        return tornado.web.Application(handlers=handlers)
+
+    def test_write_error(self):
+        response = self.fetch(WriteErrorRequestHandler.url_spec, method="GET")
+        self.assertEqual(response.code, httplib.OK)
+        self.assertEqual(response.body, '')
+
+        response = self.fetch(WriteErrorRequestHandler.url_spec, method="POST", body='{}')
+        self.assertEqual(response.code, httplib.METHOD_NOT_ALLOWED)
+        content_type = response.headers.get("Content-Type")
+        self.assertIsNotNone(content_type)
+        self.assertEqual(content_type, 'application/json; charset=UTF-8')
+        self.assertEqual(response.body, '{}')
+
+        response = self.fetch(WriteErrorRequestHandler.url_spec, method="HEAD")
+        self.assertEqual(response.code, httplib.METHOD_NOT_ALLOWED)
+        self.assertEqual(response.body, '')

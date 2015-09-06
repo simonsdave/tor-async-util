@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 Format of this file follows [these](http://keepachangelog.com/) guidelines.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.2.0] - [2015-09-06]
+### Added
+- added RequestHandler.write_error() to respond with JSON
+instead of HTML
+
 ## [1.1.0] - [2015-09-03]
 ### Added
 - added install_sigint_handler()

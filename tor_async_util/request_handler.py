@@ -187,3 +187,12 @@ class RequestHandler(tornado.web.RequestHandler):
         body = "".join(self._write_buffer)
         _logger.debug("Sending Response:%s%s", headers, body)
         return super(RequestHandler, self).flush(include_footers, callback)
+
+    def write_error(self, status_code, **kwargs):
+        """Override write_error() to generate a json rather than html
+        response on error.
+        """
+        if self.request.method != "HEAD":
+            self.set_header("Content-Type", "application/json; charset=UTF-8")
+            self.write({})
+        self.set_status(status_code)
