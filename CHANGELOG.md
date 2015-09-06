@@ -7,6 +7,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - added RequestHandler.write_error() to respond with JSON
 instead of HTML
+- **WARNING** - breaking change = tor_async_util.request_handler now
+in tor_async_util
 
 ## [1.1.0] - [2015-09-03]
 ### Added
