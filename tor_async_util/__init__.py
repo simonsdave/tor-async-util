@@ -1,16 +1,13 @@
 import base64
+import httplib
 import json
 import logging
 import re
+import signal
+import sys
 import uuid
 
 import jsonschema
-
-
-import httplib
-import signal
-import sys
-
 try:
     import pycurl
 except ImportError:
@@ -200,7 +197,7 @@ class RequestHandler(tornado.web.RequestHandler):
     """An abstract base class for request handlers."""
 
     _json_utf8_content_type_reg_ex = re.compile(
-        "^\s*application/json;\s+charset\=utf-{0,1}8\s*$",
+        "^\s*application/json(;\s+charset\=utf-{0,1}8){0,1}\s*$",
         re.IGNORECASE)
 
     def initialize(self):

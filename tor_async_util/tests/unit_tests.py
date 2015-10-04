@@ -315,7 +315,7 @@ class TestGetBasicAuthCredsRequestHandler(tor_async_util.RequestHandler):
 
 class GetBasicAuthCredsRequestHandlerTestCase(tornado.testing.AsyncHTTPTestCase):
     """A collection of unit tests for
-    tornado_util.RequestHandler.get_basic_auth_creds"""
+    RequestHandler.get_basic_auth_creds"""
 
     def get_app(self):
         handlers = [
@@ -464,7 +464,7 @@ class TestGetJsonRequestBodyRequestHandler(tor_async_util.RequestHandler):
 
 class GetJsonRequestBodyTestCase(tornado.testing.AsyncHTTPTestCase):
     """A collection of unit tests for
-    tornado_util.RequestHandler.get_json_request_body()"""
+    RequestHandler.get_json_request_body()"""
 
     def get_app(self):
         handlers = [
@@ -480,7 +480,7 @@ class GetJsonRequestBodyTestCase(tornado.testing.AsyncHTTPTestCase):
             "lp": "dave was here",
         }
         headers = {
-            "content-type": "application/json; charset=utf-8",
+            "content-type": "application/json",
         }
         response = self.fetch(
             "/dave",
@@ -502,7 +502,7 @@ class GetJsonRequestBodyTestCase(tornado.testing.AsyncHTTPTestCase):
 
     def test_bad_content_type(self):
         #
-        # first the good case ...
+        # first some good cases ...
         #
         body = {
             "lp": "dave was here",
@@ -517,10 +517,34 @@ class GetJsonRequestBodyTestCase(tornado.testing.AsyncHTTPTestCase):
             body=json.dumps(body))
         self.assertEqual(response.code, httplib.OK)
 
+        headers["content-type"] = "application/json; charset=utf-8"
+        response = self.fetch(
+            "/dave",
+            method="POST",
+            headers=tornado.httputil.HTTPHeaders(headers),
+            body=json.dumps(body))
+        self.assertEqual(response.code, httplib.OK)
+
+        headers["content-type"] = "  application/json; charset=utf-8  "
+        response = self.fetch(
+            "/dave",
+            method="POST",
+            headers=tornado.httputil.HTTPHeaders(headers),
+            body=json.dumps(body))
+        self.assertEqual(response.code, httplib.OK)
+
         #
-        # now the good case ...
+        # now some bad cases ...
         #
         headers["content-type"] = "bindle"
+        response = self.fetch(
+            "/dave",
+            method="POST",
+            headers=tornado.httputil.HTTPHeaders(headers),
+            body=json.dumps(body))
+        self.assertEqual(response.code, httplib.BAD_REQUEST)
+
+        headers["content-type"] = "application/json;"
         response = self.fetch(
             "/dave",
             method="POST",
@@ -614,7 +638,7 @@ class TornadoRequestHandlerCtrPatcher(object):
 
 class RequestHandlerTestEdgeCases(unittest.TestCase):
     """```GetJsonRequestBodyTestCase``` does the "regular"
-    unit testing for ```tornado_util.RequestHandler```. This
+    unit testing for ```RequestHandler```. This
     class validates a collection of edge cases
     that are hard to explore using using the standard
     Tornado unit testing framework."""
@@ -786,7 +810,7 @@ class TestWriteAndVerifyRequestHandler(tor_async_util.RequestHandler):
 
 class WriteAndVerifyTestCase(tornado.testing.AsyncHTTPTestCase):
     """A collection of unit tests for
-    tornado_util.RequestHandler.write_and_verify."""
+    RequestHandler.write_and_verify."""
 
     def get_app(self):
         handlers = [
