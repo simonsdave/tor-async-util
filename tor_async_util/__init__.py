@@ -15,7 +15,7 @@ except ImportError:
 import tornado.web
 
 
-__version__ = "1.1.0"
+__version__ = "1.3.0"
 
 
 _logger = logging.getLogger("tor_async_util.%s" % __name__)
