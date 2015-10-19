@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 Format of this file follows [these](http://keepachangelog.com/) guidelines.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.4.0] - [2015-10-04]
+## [1.4.0] - [2015-10-19]
 ### Added
 - added Config utility
 
