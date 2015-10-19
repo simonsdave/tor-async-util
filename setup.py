@@ -41,6 +41,7 @@ setup(
     ],
     install_requires=[
         "jsonschema==2.5.1",
+        "python-keyczar==0.715",
     ],
     version=version,
     description="Tornado Async Utilities",

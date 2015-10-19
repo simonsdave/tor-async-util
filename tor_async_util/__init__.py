@@ -1,7 +1,9 @@
 import base64
+import ConfigParser
 import httplib
 import json
 import logging
+import os
 import re
 import signal
 import sys
@@ -12,14 +14,13 @@ try:
     import pycurl
 except ImportError:
     pass
+from keyczar import keyczar
 import tornado.web
 
 
 __version__ = "1.3.0"
 
-
 _logger = logging.getLogger("tor_async_util.%s" % __name__)
-
 
 """If a debug details header is included in a response,
 ```debug_details_header_name``` is the name of the HTTP
@@ -359,3 +360,125 @@ class RequestHandler(tornado.web.RequestHandler):
             self.set_header("Content-Type", "application/json; charset=UTF-8")
             self.write({})
         self.set_status(status_code)
+
+
+class Config(object):
+    """```Config``` is a thin wrapper around
+    ```ConfigParser.ConfigParser```.
+    """
+
+    """```instance``` is intended to enable implementation
+    of the Singleton pattern for an instance of ```Config```.
+    The following illustrates how ```instance``` was intended
+    to be used:
+
+        .
+        .
+        .
+
+        if __name__ == "__main__":
+            clp = CommandLineParser()
+            (clo, cla) = clp.parse_args()
+
+            Config.instance = Config(clo.config)
+            config_section = "some_section"
+
+            .
+            .
+            .
+    """
+    instance = None
+
+    """Used to determine if a string represents an integer value."""
+    _int_reg_ex = re.compile(
+        "^\-{0,1}\d+$",
+        re.IGNORECASE)
+
+    """Used to determine if a string represents a "true" boolean value."""
+    _true_reg_ex = re.compile(
+        "^(true|t|y|yes|1)$",
+        re.IGNORECASE)
+
+    """Used to determine if a string represents a "false" boolean value."""
+    _false_reg_ex = re.compile(
+        "^(false|f|n|no|0)$",
+        re.IGNORECASE)
+
+    """Used to turn a logging level string into a logging level."""
+    _logging_level_reg_ex = re.compile(
+        "^(DEBUG|INFO|WARNING|ERROR|CRITICAL|FATAL)$",
+        re.IGNORECASE)
+
+    def __init__(self, config_file):
+        """Create an instance of ```Config``` by reading the
+        contents of the ini file ```config_file```.
+        ```os.path.expanduser``` is used to transform ```config_file```
+        and deal with things like leading ~ **before** the contents
+        of the ini file are read.
+        """
+        object.__init__(self)
+
+        expanded_config_file = os.path.expanduser(config_file)
+
+        self._config = ConfigParser.ConfigParser()
+        self._config.read(expanded_config_file)
+
+    def get(self, section, option, value_if_not_found=None):
+        value = self._config.get(section, option) if self._config.has_option(section, option) else value_if_not_found
+        return os.path.expanduser(value) if value else value
+
+    def get_int(self, section, option, value_if_not_found=0):
+        value = self.get(section, option, None)
+        if value is None:
+            return value_if_not_found
+        if not type(self)._int_reg_ex.match(value):
+            return value_if_not_found
+        return int(value)
+
+    def get_boolean(self, section, option, value_if_not_found=False):
+        value = self.get(section, option, None)
+        if value is None:
+            return value_if_not_found
+        if type(self)._true_reg_ex.match(value):
+            return True
+        if type(self)._false_reg_ex.match(value):
+            return False
+        return value_if_not_found
+
+    def get_logging_level(self, section, option, value_if_not_found=logging.INFO):
+        logging_level_as_str = self.get(section, option, None)
+        if logging_level_as_str is None:
+            return value_if_not_found
+
+        if not type(self)._logging_level_reg_ex.match(logging_level_as_str):
+            return value_if_not_found
+
+        return getattr(logging, logging_level_as_str.upper())
+
+    def get_crypter(self, section, option, value_if_not_found=None):
+        """Creates and returns the keyczar crypter who's key store is in the
+        directory pointed to by section & option. If something doesn't
+        get found or an error occurs during crypter creation, then
+        ```value_if_not_found``` is returned.
+        """
+        dir_name = self.get(section, option, None)
+        if not dir_name:
+            return value_if_not_found
+        try:
+            return keyczar.Crypter.Read(dir_name)
+        except Exception:
+            return value_if_not_found
+
+    def get_signer(self, section, option, value_if_not_found=None):
+        """Creates and returns the keyczar signer who's key store is in the
+        directory pointed to by section & option. If something doesn't
+        get found or an error occurs during signer creation, then
+        ```value_if_not_found``` is returned.
+        """
+        dir_name = self.get(section, option, None)
+        if not dir_name:
+            return value_if_not_found
+        try:
+            return keyczar.Signer.Read(dir_name)
+        except Exception:
+            return value_if_not_found

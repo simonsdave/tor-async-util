@@ -1,14 +1,20 @@
 """This module contains unit testings for __init__.py."""
 
+import logging
 import json
 import httplib
+import os
 import re
+import shutil
 import signal
 import sys
+import tempfile
 import unittest
 import uuid
 
 import jsonschema
+from keyczar import keyczar
+from keyczar import keyczart
 import mock
 import tornado.testing
 import tornado.web
@@ -927,3 +933,256 @@ class WriteErrorTestCase(tornado.testing.AsyncHTTPTestCase):
         response = self.fetch(WriteErrorRequestHandler.url_spec, method="HEAD")
         self.assertEqual(response.code, httplib.METHOD_NOT_ALLOWED)
         self.assertEqual(response.body, '')
+
+
+class TempConfigFile(object):
+
+    def __init__(self, option=None, value=None):
+        object.__init__(self)
+
+        self.section = "some_service"
+
+        ntf = tempfile.NamedTemporaryFile(delete=False)
+        self.filename = ntf.name
+        ntf.write("[%s]\n" % self.section)
+
+        if option is not None and value is not None:
+            ntf.write("%s=%s\n" % (option, value))
+
+        ntf.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        os.remove(self.filename)
+
+
+class TempDirectory(object):
+
+    def __init__(self):
+        object.__init__(self)
+        self._dir_name = None
+
+    def __enter__(self):
+        self._dir_name = tempfile.mkdtemp()
+        return self._dir_name
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self._dir_name:
+            shutil.rmtree(self._dir_name, ignore_errors=True)
+
+
+class ConfigTestCase(unittest.TestCase):
+    """A collection of unit tests for Config."""
+
+    def test_ctr_with_config_file_that_does_not_exist(self):
+        filename_that_does_not_exist = uuid.uuid4().hex
+        config = tor_async_util.Config(filename_that_does_not_exist)
+
+        section_name = uuid.uuid4().hex
+        option_name = uuid.uuid4().hex
+        value_if_not_found = uuid.uuid4().hex
+        self.assertEqual(
+            value_if_not_found,
+            config.get(section_name, option_name, value_if_not_found))
+
+    def test_get(self):
+        option = uuid.uuid4().hex
+        value = uuid.uuid4().hex
+        with TempConfigFile(option, value) as tcf:
+            config = tor_async_util.Config(tcf.filename)
+            value_if_not_found = uuid.uuid4().hex
+            read_value = config.get(tcf.section, option, value_if_not_found)
+            self.assertEqual(read_value, value)
+
+    def test_get_not_found(self):
+        with TempConfigFile() as tcf:
+            config = tor_async_util.Config(tcf.filename)
+            option = uuid.uuid4().hex
+            value_if_not_found = uuid.uuid4().hex
+            read_value = config.get(tcf.section, option, value_if_not_found)
+            self.assertEqual(read_value, value_if_not_found)
+
+    def test_get_expanduser_working(self):
+        option = uuid.uuid4().hex
+        value_postfix = uuid.uuid4().hex
+        value = "~/" + value_postfix
+        with TempConfigFile(option, value) as tcf:
+            config = tor_async_util.Config(tcf.filename)
+            value_if_not_found = uuid.uuid4().hex
+            read_value = config.get(tcf.section, option, value_if_not_found)
+            self.assertFalse(read_value.startswith("~"))
+            self.assertTrue(read_value.endswith(value_postfix))
+
+    def test_get_int_positive(self):
+        option = uuid.uuid4().hex
+        value = "342"
+        with TempConfigFile(option, value) as tcf:
+            config = tor_async_util.Config(tcf.filename)
+            value_if_not_found = uuid.uuid4().hex
+            read_value = config.get_int(tcf.section, option, value_if_not_found)
+            self.assertEqual(read_value, int(value))
+
+    def test_get_int_zero(self):
+        option = uuid.uuid4().hex
+        value = "0"
+        with TempConfigFile(option, value) as tcf:
+            config = tor_async_util.Config(tcf.filename)
+            value_if_not_found = uuid.uuid4().hex
+            read_value = config.get_int(tcf.section, option, value_if_not_found)
+            self.assertEqual(read_value, int(value))
+
+    def test_get_int_negative(self):
+        option = uuid.uuid4().hex
+        value = "-8713"
+        with TempConfigFile(option, value) as tcf:
+            config = tor_async_util.Config(tcf.filename)
+            value_if_not_found = uuid.uuid4().hex
+            read_value = config.get_int(tcf.section, option, value_if_not_found)
+            self.assertEqual(read_value, int(value))
+
+    def test_get_int_not_found(self):
+        with TempConfigFile() as tcf:
+            config = tor_async_util.Config(tcf.filename)
+            option = uuid.uuid4().hex
+            value_if_not_found = uuid.uuid4().hex
+            read_value = config.get_int(tcf.section, option, value_if_not_found)
+            self.assertEqual(read_value, value_if_not_found)
+
+    def test_get_int_not_an_int(self):
+        option = uuid.uuid4().hex
+        value = uuid.uuid4().hex
+        with TempConfigFile(option, value) as tcf:
+            config = tor_async_util.Config(tcf.filename)
+            value_if_not_found = uuid.uuid4().hex
+            read_value = config.get_int(tcf.section, option, value_if_not_found)
+            self.assertEqual(read_value, value_if_not_found)
+
+    def test_get_boolean(self):
+        test_data = {
+            "true": True,
+            "True": True,
+            "1": True,
+            "y": True,
+            "false": False,
+            "False": False,
+            "0": False,
+            "n": False,
+        }
+        for (value, expected_value) in test_data.iteritems():
+            option = uuid.uuid4().hex
+            with TempConfigFile(option, value) as tcf:
+                config = tor_async_util.Config(tcf.filename)
+                value_if_not_found = uuid.uuid4().hex
+                read_value = config.get_boolean(tcf.section, option, value_if_not_found)
+                self.assertEqual(read_value, expected_value)
+
+    def test_get_boolean_not_found(self):
+        with TempConfigFile() as tcf:
+            config = tor_async_util.Config(tcf.filename)
+            option = uuid.uuid4().hex
+            value_if_not_found = uuid.uuid4().hex
+            read_value = config.get_boolean(tcf.section, option, value_if_not_found)
+            self.assertEqual(read_value, value_if_not_found)
+
+    def test_get_boolean_not_a_boolean(self):
+        option = uuid.uuid4().hex
+        value = uuid.uuid4().hex
+        with TempConfigFile(option, value) as tcf:
+            config = tor_async_util.Config(tcf.filename)
+            value_if_not_found = uuid.uuid4().hex
+            read_value = config.get_boolean(tcf.section, option, value_if_not_found)
+            self.assertEqual(read_value, value_if_not_found)
+
+    def test_get_logging_level(self):
+        test_data = {
+            "debug": logging.DEBUG,
+            "info": logging.INFO,
+            "Info": logging.INFO,
+            "InFo": logging.INFO,
+            "WARNING": logging.WARNING,
+            "ERROR": logging.ERROR,
+            "critical": logging.CRITICAL,
+            "fatal": logging.FATAL,
+        }
+        for (value, expected_value) in test_data.iteritems():
+            option = uuid.uuid4().hex
+            with TempConfigFile(option, value) as tcf:
+                config = tor_async_util.Config(tcf.filename)
+                value_if_not_found = uuid.uuid4().hex
+                read_value = config.get_logging_level(tcf.section, option, value_if_not_found)
+                self.assertEqual(read_value, expected_value)
+
+    def test_get_logging_level_not_found(self):
+        with TempConfigFile() as tcf:
+            config = tor_async_util.Config(tcf.filename)
+            option = uuid.uuid4().hex
+            value_if_not_found = uuid.uuid4().hex
+            read_value = config.get_logging_level(tcf.section, option, value_if_not_found)
+            self.assertEqual(read_value, value_if_not_found)
+
+    def test_get_logging_level_not_a_logging_level(self):
+        option = uuid.uuid4().hex
+        value = uuid.uuid4().hex
+        with TempConfigFile(option, value) as tcf:
+            config = tor_async_util.Config(tcf.filename)
+            value_if_not_found = uuid.uuid4().hex
+            read_value = config.get_logging_level(tcf.section, option, value_if_not_found)
+            self.assertEqual(read_value, value_if_not_found)
+
+    def test_get_crypter_happy_path(self):
+        with TempDirectory() as dir_name:
+            keyczart.Create(dir_name, "some purpose", keyczart.keyinfo.DECRYPT_AND_ENCRYPT)
+
+            option = uuid.uuid4().hex
+            with TempConfigFile(option, dir_name) as tcf:
+                config = tor_async_util.Config(tcf.filename)
+                value_if_not_found = uuid.uuid4().hex
+                crypter = config.get_crypter(tcf.section, option, value_if_not_found)
+                self.assertEqual(type(crypter), keyczar.Crypter)
+
+    def test_get_crypter_option_not_in_config_file(self):
+        with TempConfigFile() as tcf:
+            config = tor_async_util.Config(tcf.filename)
+            option = uuid.uuid4().hex
+            value_if_not_found = uuid.uuid4().hex
+            crypter = config.get_crypter(tcf.section, option, value_if_not_found)
+            self.assertEqual(crypter, value_if_not_found)
+
+    def test_get_crypter_empty_directory(self):
+        with TempDirectory() as dir_name:
+            option = uuid.uuid4().hex
+            with TempConfigFile(option, dir_name) as tcf:
+                config = tor_async_util.Config(tcf.filename)
+                value_if_not_found = uuid.uuid4().hex
+                crypter = config.get_crypter(tcf.section, option, value_if_not_found)
+                self.assertEqual(crypter, value_if_not_found)
+
+    def test_get_signer_happy_path(self):
+        with TempDirectory() as dir_name:
+            keyczart.Create(dir_name, "some purpose", keyczart.keyinfo.SIGN_AND_VERIFY)
+
+            option = uuid.uuid4().hex
+            with TempConfigFile(option, dir_name) as tcf:
+                config = tor_async_util.Config(tcf.filename)
+                value_if_not_found = uuid.uuid4().hex
+                signer = config.get_signer(tcf.section, option, value_if_not_found)
+                self.assertEqual(type(signer), keyczar.Signer)
+
+    def test_get_signer_option_not_in_config_file(self):
+        with TempConfigFile() as tcf:
+            config = tor_async_util.Config(tcf.filename)
+            option = uuid.uuid4().hex
+            value_if_not_found = uuid.uuid4().hex
+            signer = config.get_signer(tcf.section, option, value_if_not_found)
+            self.assertEqual(signer, value_if_not_found)
+
+    def test_get_signer_empty_directory(self):
+        with TempDirectory() as dir_name:
+            option = uuid.uuid4().hex
+            with TempConfigFile(option, dir_name) as tcf:
+                config = tor_async_util.Config(tcf.filename)
+                value_if_not_found = uuid.uuid4().hex
+                signer = config.get_signer(tcf.section, option, value_if_not_found)
+                self.assertEqual(signer, value_if_not_found)
