@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 Format of this file follows [these](http://keepachangelog.com/) guidelines.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.4.0] - [2015-10-04]
+### Added
+- added Config utility
+
 ## [1.3.0] - [2015-10-04]
 ### Changed
 - RequestHandler.get_json_request_body() now accepts
