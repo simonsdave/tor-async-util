@@ -418,10 +418,10 @@ class Config(object):
         """
         object.__init__(self)
 
-        expanded_config_file = os.path.expanduser(config_file)
+        self.config_file = os.path.expanduser(config_file)
 
         self._config = ConfigParser.ConfigParser()
-        self._config.read(expanded_config_file)
+        self._config.read(self.config_file)
 
     def get(self, section, option, value_if_not_found=None):
         value = self._config.get(section, option) if self._config.has_option(section, option) else value_if_not_found
