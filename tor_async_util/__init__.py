@@ -7,7 +7,6 @@ import os
 import re
 import signal
 import sys
-import uuid
 
 import jsonschema
 try:
