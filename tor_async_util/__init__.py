@@ -201,9 +201,6 @@ class RequestHandler(tornado.web.RequestHandler):
         "^\s*application/json(;\s+charset\=utf-{0,1}8){0,1}\s*$",
         re.IGNORECASE)
 
-    def initialize(self):
-        self.correlation_id = uuid.uuid4().hex
-
     def add_debug_details(self, value):
         """Include debug details in a response. Specifically, include
         an HTTP header in the response with the corresponding value
@@ -270,7 +267,6 @@ class RequestHandler(tornado.web.RequestHandler):
             return False
 
         self.set_header("Content-Type", "application/json; charset=UTF-8")
-        self.set_header("PTS-IDS-CID", self.correlation_id)
         self.write(json.dumps(json_body, indent=2))
 
         return True
