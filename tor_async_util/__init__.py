@@ -267,7 +267,7 @@ class RequestHandler(tornado.web.RequestHandler):
             return False
 
         self.set_header("Content-Type", "application/json; charset=UTF-8")
-        self.write(json.dumps(json_body, indent=2))
+        self.write(json.dumps(json_body))
 
         return True
 
