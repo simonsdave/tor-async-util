@@ -18,7 +18,7 @@ from keyczar import keyczar
 import tornado.web
 
 
-__version__ = "1.4.0"
+__version__ = "1.5.0"
 
 _logger = logging.getLogger("tor_async_util.%s" % __name__)
 
