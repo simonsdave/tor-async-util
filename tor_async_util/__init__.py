@@ -215,7 +215,7 @@ class RequestHandler(tornado.web.RequestHandler):
                 "0x{:04x}".format(value))
 
     def set_default_headers(self):
-        """The less a potential threat knows about security infrastructre
+        """The less a potential threat knows about infrastructre
         the better. With that in mind, this method attempts to remove the
         Server HTTP header if it appears in a response.
         """
@@ -229,7 +229,8 @@ class RequestHandler(tornado.web.RequestHandler):
         """Get the request's JSON body and convert it into a dict
         and validate it against ```schema```.
         If there's no body, the body isn't JSON, etc then return
-        ```None``  otherwise return the dict."""
+        ```None``  otherwise return the dict.
+        """
         content_length = self.request.headers.get("Content-Length", None)
         if content_length is None:
             transfer_encoding = self.request.headers.get("Transfer-Encoding", None)
@@ -261,7 +262,8 @@ class RequestHandler(tornado.web.RequestHandler):
         with the response body and can still do so. This method
         is a replacement for self.write(). This method calls
         self.write() after validating the response body against
-        a jsonschema."""
+        a jsonschema.
+        """
         try:
             jsonschema.validate(json_body, schema)
         except Exception as ex:
@@ -286,8 +288,8 @@ class RequestHandler(tornado.web.RequestHandler):
         """Assuming BASIC auth is being used, returns the username
         and password (as a pair) after extracting and decoding
         them from the request's Authorization header. If any
-        kind of error is detected a pair of None's is returned."""
-
+        kind of error is detected a pair of None's is returned.
+        """
         auth_hdr_val = self.request.headers.get("Authorization", None)
         if auth_hdr_val is None:
             return (None, None, self.GBAC_NO_AUTHORIZATION_HEADER)
