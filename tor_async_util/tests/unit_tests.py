@@ -692,15 +692,6 @@ class RequestHandlerTestEdgeCases(unittest.TestCase):
             body = the_request_handler.get_json_request_body(self.schema)
             self.assertIsNone(body)
 
-        # makes things work by adding an alternative content type
-        the_request.headers["Transfer-Encoding"] = "anything"
-
-        with TornadoRequestHandlerCtrPatcher(the_request):
-            the_request_handler = tor_async_util.RequestHandler()
-            body = the_request_handler.get_json_request_body(self.schema)
-            self.assertIsNotNone(body)
-            self.assertEqual(body, the_body)
-
     def test_body_is_none(self):
         the_body = {
             "msg": "dave was here!!!",

@@ -233,9 +233,7 @@ class RequestHandler(tornado.web.RequestHandler):
         """
         content_length = self.request.headers.get("Content-Length", None)
         if content_length is None:
-            transfer_encoding = self.request.headers.get("Transfer-Encoding", None)
-            if transfer_encoding is None:
-                return None
+            return None
 
         if self.request.body is None:
             return None
