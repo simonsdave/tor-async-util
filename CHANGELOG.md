@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 Format of this file follows [these](http://keepachangelog.com/) guidelines.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.5.0] - [2015-11-08]
+### Removed
+- support for Transfer-Encoding http header removed
+- removed PTS-IDS-CID http header
+
+### Changed
+- write_and_verify() no longer "pretty prints" json response
+
 ## [1.4.0] - [2015-10-19]
 ### Added
 - added Config utility
