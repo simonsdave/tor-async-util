@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 Format of this file follows [these](http://keepachangelog.com/) guidelines.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.6.0] - [2016-01-05]
+### Changed
+- relax constraints on version of tornado and requests
+
 ## [1.5.0] - [2015-11-08]
 ### Removed
 - support for Transfer-Encoding http header removed
