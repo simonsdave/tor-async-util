@@ -40,7 +40,7 @@ setup(
         "tor_async_util",
     ],
     install_requires=[
-        "jsonschema==2.5.1",
+        "jsonschema>=2.5.0",
         "python-keyczar==0.715",
     ],
     version=version,

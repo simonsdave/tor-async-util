@@ -5,7 +5,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.6.0] - [2016-01-05]
 ### Changed
-- relax constraints on version of tornado and requests
+- relax constraints on supported versions of jsonschema,
+tornado and requests
 
 ## [1.5.0] - [2015-11-08]
 ### Removed
