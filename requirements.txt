@@ -8,5 +8,5 @@ nose-cov==1.6
 nose-pudb==1.0
 pep8==1.6.2
 pudb==2015.4.1
-requests==2.8.1
-tornado==4.3
+requests>=2.7.0
+tornado>=4.1
