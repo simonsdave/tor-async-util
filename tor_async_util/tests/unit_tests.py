@@ -1,4 +1,4 @@
-"""This module contains unit testings for __init__.py."""
+"""This module contains unit tests for __init__.py."""
 
 import logging
 import json
@@ -249,17 +249,6 @@ class RequestHandlerTestCase(tornado.testing.AsyncHTTPTestCase):
     _json_utf8_content_type_reg_ex = re.compile(
         "^\s*application/json;\s+charset\=utf-{0,1}8\s*$",
         re.IGNORECASE)
-
-    @classmethod
-    def setUpClass(cls):
-        cls._debug_details_patcher = mock.patch(
-            "tor_async_util.include_debug_details",
-            mock.Mock(return_value=True))
-        cls._debug_details_patcher.start()
-
-    @classmethod
-    def tearDownClass(cls):
-        cls._debug_details_patcher.stop()
 
     def fetch(self, path, **kwargs):
         if kwargs.get('method') in {'POST', 'PUT'}:
@@ -1177,3 +1166,69 @@ class ConfigTestCase(unittest.TestCase):
                 value_if_not_found = uuid.uuid4().hex
                 signer = config.get_keyczar_signer(tcf.section, option, value_if_not_found)
                 self.assertEqual(signer, value_if_not_found)
+
+
+class LoggerIsEnabledForPatcher(Patcher):
+    """This context manager provides an easy way to install a
+    patch allowing the caller to determine the return value of
+    tor_async_util._logger.isEnabledFor().
+    """
+
+    def __init__(self, is_enabled):
+
+        def is_enabled_for_patch(*args, **kwargs):
+            return is_enabled
+
+        patcher = mock.patch(
+            (
+                'tor_async_util._logger.isEnabledFor'
+            ),
+            is_enabled_for_patch)
+
+        Patcher.__init__(self, patcher)
+
+
+class TestAddDebugDetailsRequestHandler(tor_async_util.RequestHandler):
+    """This class is only used by ```AddDebugDetailsTestCase```."""
+
+    url_spec = r"/dave"
+
+    @tornado.web.asynchronous
+    def get(self):
+        value = int(self.get_argument('value', 0))
+        self.add_debug_details(value)
+        self.write({})
+        self.set_status(httplib.OK)
+        self.finish()
+
+
+class AddDebugDetailsTestCase(RequestHandlerTestCase):
+    """A collection of unit tests for
+    RequestHandler.add_debug_details."""
+
+    def get_app(self):
+        handlers = [
+            (
+                TestAddDebugDetailsRequestHandler.url_spec,
+                TestAddDebugDetailsRequestHandler
+            ),
+        ]
+        return tornado.web.Application(handlers=handlers)
+
+    def _test_debug_details(self, is_enabled):
+        with LoggerIsEnabledForPatcher(is_enabled):
+            debug_detail = 99
+            response = self.fetch(
+                '%s?value=%d' % (TestAddDebugDetailsRequestHandler.url_spec, debug_detail),
+                method='GET')
+            self.assertEqual(response.code, httplib.OK)
+            if is_enabled:
+                self.assertDebugDetail(response, debug_detail)
+            else:
+                self.assertNoDebugDetail(response)
+
+    def test_debug_details_enabled(self):
+        self._test_debug_details(True)
+
+    def test_no_debug_details_enabled(self):
+        self._test_debug_details(False)

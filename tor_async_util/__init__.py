@@ -187,14 +187,6 @@ class DefaultRequestHandler(tornado.web.RequestHandler):
         self.set_status(httplib.NOT_FOUND)
 
 
-def include_debug_details():
-    """If ```include_debug_details()``` returns True, RequestHandler
-    will include a debug details HTTP header whenever an error
-    is encountered.
-    """
-    return _logger.isEnabledFor(logging.DEBUG)
-
-
 class RequestHandler(tornado.web.RequestHandler):
     """An abstract base class for request handlers."""
 
@@ -207,7 +199,7 @@ class RequestHandler(tornado.web.RequestHandler):
         an HTTP header in the response with the corresponding value
         of ```value```.
         """
-        if include_debug_details():
+        if _logger.isEnabledFor(logging.DEBUG):
             self.set_header(
                 debug_details_header_name,
                 "0x{:04x}".format(value))
