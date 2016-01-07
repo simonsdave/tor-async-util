@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 Format of this file follows [these](http://keepachangelog.com/) guidelines.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.7.0] - [2016-01-xx]
+## [1.7.0] - [2016-01-06]
 ### Changed
 - **WARNING** - breaking change = rename get_crypter() to get_keyczar_crypter()
 - **WARNING** - breaking change = rename get_signer() to get_keyczar_signer()
