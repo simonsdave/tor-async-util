@@ -17,9 +17,11 @@ from keyczar import keyczar
 import tornado.web
 
 
-__version__ = "1.6.0"
+__version__ = "1.7.0"
+
 
 _logger = logging.getLogger("tor_async_util.%s" % __name__)
+
 
 """If a debug details header is included in a response,
 ```debug_details_header_name``` is the name of the HTTP
