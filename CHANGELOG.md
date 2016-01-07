@@ -3,11 +3,14 @@ All notable changes to this project will be documented in this file.
 Format of this file follows [these](http://keepachangelog.com/) guidelines.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.7.0] - [2016-01-xx]
+### Changed
+- **WARNING** - breaking change = rename get_crypter() to get_keyczar_crypter()
+- **WARNING** - breaking change = rename get_signer() to get_keyczar_signer()
+
 ## [1.6.0] - [2016-01-05]
 ### Changed
 - relax constraints on supported versions of jsonschema, tornado and requests
-- **WARNING** - breaking change = rename get_crypter() to get_keyczar_crypter()
-- **WARNING** - breaking change = rename get_signer() to get_keyczar_signer()
 
 ## [1.5.0] - [2015-11-08]
 ### Removed
