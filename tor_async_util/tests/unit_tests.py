@@ -1122,7 +1122,7 @@ class ConfigTestCase(unittest.TestCase):
             read_value = config.get_logging_level(tcf.section, option, value_if_not_found)
             self.assertEqual(read_value, value_if_not_found)
 
-    def test_get_crypter_happy_path(self):
+    def test_get_keyczar_crypter_happy_path(self):
         with TempDirectory() as dir_name:
             keyczart.Create(dir_name, "some purpose", keyczart.keyinfo.DECRYPT_AND_ENCRYPT)
 
@@ -1130,27 +1130,27 @@ class ConfigTestCase(unittest.TestCase):
             with TempConfigFile(option, dir_name) as tcf:
                 config = tor_async_util.Config(tcf.filename)
                 value_if_not_found = uuid.uuid4().hex
-                crypter = config.get_crypter(tcf.section, option, value_if_not_found)
+                crypter = config.get_keyczar_crypter(tcf.section, option, value_if_not_found)
                 self.assertEqual(type(crypter), keyczar.Crypter)
 
-    def test_get_crypter_option_not_in_config_file(self):
+    def test_get_keyczar_crypter_option_not_in_config_file(self):
         with TempConfigFile() as tcf:
             config = tor_async_util.Config(tcf.filename)
             option = uuid.uuid4().hex
             value_if_not_found = uuid.uuid4().hex
-            crypter = config.get_crypter(tcf.section, option, value_if_not_found)
+            crypter = config.get_keyczar_crypter(tcf.section, option, value_if_not_found)
             self.assertEqual(crypter, value_if_not_found)
 
-    def test_get_crypter_empty_directory(self):
+    def test_get_keyczar_crypter_empty_directory(self):
         with TempDirectory() as dir_name:
             option = uuid.uuid4().hex
             with TempConfigFile(option, dir_name) as tcf:
                 config = tor_async_util.Config(tcf.filename)
                 value_if_not_found = uuid.uuid4().hex
-                crypter = config.get_crypter(tcf.section, option, value_if_not_found)
+                crypter = config.get_keyczar_crypter(tcf.section, option, value_if_not_found)
                 self.assertEqual(crypter, value_if_not_found)
 
-    def test_get_signer_happy_path(self):
+    def test_get_keyczar_signer_happy_path(self):
         with TempDirectory() as dir_name:
             keyczart.Create(dir_name, "some purpose", keyczart.keyinfo.SIGN_AND_VERIFY)
 
@@ -1158,22 +1158,22 @@ class ConfigTestCase(unittest.TestCase):
             with TempConfigFile(option, dir_name) as tcf:
                 config = tor_async_util.Config(tcf.filename)
                 value_if_not_found = uuid.uuid4().hex
-                signer = config.get_signer(tcf.section, option, value_if_not_found)
+                signer = config.get_keyczar_signer(tcf.section, option, value_if_not_found)
                 self.assertEqual(type(signer), keyczar.Signer)
 
-    def test_get_signer_option_not_in_config_file(self):
+    def test_get_keyczar_signer_option_not_in_config_file(self):
         with TempConfigFile() as tcf:
             config = tor_async_util.Config(tcf.filename)
             option = uuid.uuid4().hex
             value_if_not_found = uuid.uuid4().hex
-            signer = config.get_signer(tcf.section, option, value_if_not_found)
+            signer = config.get_keyczar_signer(tcf.section, option, value_if_not_found)
             self.assertEqual(signer, value_if_not_found)
 
-    def test_get_signer_empty_directory(self):
+    def test_get_keyczar_signer_empty_directory(self):
         with TempDirectory() as dir_name:
             option = uuid.uuid4().hex
             with TempConfigFile(option, dir_name) as tcf:
                 config = tor_async_util.Config(tcf.filename)
                 value_if_not_found = uuid.uuid4().hex
-                signer = config.get_signer(tcf.section, option, value_if_not_found)
+                signer = config.get_keyczar_signer(tcf.section, option, value_if_not_found)
                 self.assertEqual(signer, value_if_not_found)

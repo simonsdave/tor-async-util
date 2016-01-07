@@ -450,7 +450,7 @@ class Config(object):
 
         return getattr(logging, logging_level_as_str.upper())
 
-    def get_crypter(self, section, option, value_if_not_found=None):
+    def get_keyczar_crypter(self, section, option, value_if_not_found=None):
         """Creates and returns the keyczar crypter who's key store is in the
         directory pointed to by section & option. If something doesn't
         get found or an error occurs during crypter creation, then
@@ -464,7 +464,7 @@ class Config(object):
         except Exception:
             return value_if_not_found
 
-    def get_signer(self, section, option, value_if_not_found=None):
+    def get_keyczar_signer(self, section, option, value_if_not_found=None):
         """Creates and returns the keyczar signer who's key store is in the
         directory pointed to by section & option. If something doesn't
         get found or an error occurs during signer creation, then
