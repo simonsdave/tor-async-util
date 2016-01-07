@@ -917,17 +917,21 @@ class WriteErrorTestCase(tornado.testing.AsyncHTTPTestCase):
 
 class TempConfigFile(object):
 
-    def __init__(self, option=None, value=None):
+    def __init__(self, option=None, value=None, values=None):
         object.__init__(self)
 
-        self.section = "some_service"
+        self.section = uuid.uuid4().hex
 
         ntf = tempfile.NamedTemporaryFile(delete=False)
         self.filename = ntf.name
         ntf.write("[%s]\n" % self.section)
 
         if option is not None and value is not None:
-            ntf.write("%s=%s\n" % (option, value))
+            self._write(ntf, option, value)
+
+        if values is not None:
+            for (option, value) in values:
+                self._write(ntf, option, value)
 
         ntf.close()
 
@@ -936,6 +940,9 @@ class TempConfigFile(object):
 
     def __exit__(self, exc_type, exc_value, traceback):
         os.remove(self.filename)
+
+    def _write(self, ntf, option, value):
+        ntf.write("%s=%s\n" % (option, value))
 
 
 class TempDirectory(object):
@@ -994,6 +1001,26 @@ class ConfigTestCase(unittest.TestCase):
             read_value = config.get(tcf.section, option, value_if_not_found)
             self.assertFalse(read_value.startswith("~"))
             self.assertTrue(read_value.endswith(value_postfix))
+
+    def test_get_all_values_for_missing_section(self):
+        with TempConfigFile() as tcf:
+            config = tor_async_util.Config(tcf.filename)
+            non_existent_section = uuid.uuid4().hex
+            values_if_not_found = uuid.uuid4().hex
+            read_values = config.get_all_values(non_existent_section, values_if_not_found)
+            self.assertEqual(read_values, values_if_not_found)
+
+    def test_get_all_values_happy_path(self):
+        values = [
+            ('dave', 'was'),
+            ('here', 'to'),
+            ('help', 'or not:-)'),
+        ]
+        with TempConfigFile(values=values) as tcf:
+            config = tor_async_util.Config(tcf.filename)
+            values_if_not_found = uuid.uuid4().hex
+            read_values = config.get_all_values(tcf.section, values_if_not_found)
+            self.assertEqual(read_values, values)
 
     def test_get_int_positive(self):
         option = uuid.uuid4().hex

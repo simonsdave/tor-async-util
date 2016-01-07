@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - **WARNING** - breaking change = rename get_crypter() to get_keyczar_crypter()
 - **WARNING** - breaking change = rename get_signer() to get_keyczar_signer()
+- added tor_async_util.Config.get_all_values()
 
 ## [1.6.0] - [2016-01-05]
 ### Changed

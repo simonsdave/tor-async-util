@@ -412,6 +412,9 @@ class Config(object):
         self._config = ConfigParser.ConfigParser()
         self._config.read(self.config_file)
 
+    def get_all_values(self, section, values_if_not_found=None):
+        return self._config.items(section) if self._config.has_section(section) else values_if_not_found
+
     def get(self, section, option, value_if_not_found=None):
         value = self._config.get(section, option) if self._config.has_option(section, option) else value_if_not_found
         return os.path.expanduser(value) if value else value
