@@ -44,6 +44,7 @@ setup(
         "python-keyczar==0.715",
     ],
     version=version,
+    include_package_data=True,
     description="Tornado Async Utilities",
     author="Dave Simons",
     author_email="simonsdave@gmail.com",

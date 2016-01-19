@@ -16,6 +16,8 @@ except ImportError:
 from keyczar import keyczar
 import tornado.web
 
+import jsonschemas
+
 
 __version__ = "1.7.0"
 
@@ -474,3 +476,50 @@ class Config(object):
             return keyczar.Signer.Read(dir_name)
         except Exception:
             return value_if_not_found
+
+
+"""```GNR_INVALID_RESPONSE_BODY``` is used in ```generate_noop_response()```
+to indicate that an invalid response body has been generated. This should
+never happen!
+"""
+GNR_INVALID_RESPONSE_BODY = 0x0001
+
+
+def generate_noop_response(request_handler):
+    """This function encapsulates all the functionality required
+    to generate a response to a no-op request.
+
+        import tor_async_util
+
+        class ServiceNoOpRequestHandler(tor_async_util.RequestHandler):
+
+            url_spec = r'/v1.0/service/_noop'
+
+            @tornado.web.asynchronous
+            def get(self):
+                tor_async_util.generate_noop_response(self)
+    """
+    location = '%s://%s%s' % (
+        request_handler.request.protocol,
+        request_handler.request.host,
+        request_handler.request.path,
+    )
+
+    body = {
+        'links': {
+            'self': {
+                'href': location,
+            },
+        },
+    }
+
+    if not request_handler.write_and_verify(body, jsonschemas.get_noop_response):
+        request_handler.add_debug_details(GNR_INVALID_RESPONSE_BODY)
+        request_handler.set_status(httplib.INTERNAL_SERVER_ERROR)
+        request_handler.finish()
+        return
+
+    request_handler.set_header('Location', location)
+
+    request_handler.set_status(httplib.OK)
+    request_handler.finish()

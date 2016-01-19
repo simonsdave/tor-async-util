@@ -1259,3 +1259,36 @@ class AddDebugDetailsTestCase(RequestHandlerTestCase):
 
     def test_no_debug_details_enabled(self):
         self._test_debug_details(False)
+
+
+class TestNoOpRequestHandler(tor_async_util.RequestHandler):
+
+    url_spec = r'/bindle'
+
+    @tornado.web.asynchronous
+    def get(self):
+        tor_async_util.generate_noop_response(self)
+
+
+class NoOpTestCase(RequestHandlerTestCase):
+    """Unit tests for generate_noop_response()."""
+
+    def get_app(self):
+        handlers = [
+            (
+                TestNoOpRequestHandler.url_spec,
+                TestNoOpRequestHandler
+            ),
+        ]
+        return tornado.web.Application(handlers=handlers)
+
+    def test_bad_response_body(self):
+        with WriteAndVerifyPatcher(is_ok=False):
+            response = self.fetch(TestNoOpRequestHandler.url_spec, method='GET')
+            self.assertEqual(response.code, httplib.INTERNAL_SERVER_ERROR)
+            self.assertDebugDetail(response, tor_async_util.GNR_INVALID_RESPONSE_BODY)
+
+    def test_happy_path(self):
+        response = self.fetch(TestNoOpRequestHandler.url_spec, method='GET')
+        self.assertEqual(response.code, httplib.OK)
+        self.assertNoDebugDetail(response)
