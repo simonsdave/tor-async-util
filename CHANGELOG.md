@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [1.8.0] - [2016-01-19]
 ### Added
 - generate_noop_response() for generating noop responses
+- generate_health_check_response() for generating health check responses
 
 ## [1.7.0] - [2016-01-06]
 ### Changed

@@ -523,3 +523,129 @@ def generate_noop_response(request_handler):
 
     request_handler.set_status(httplib.OK)
     request_handler.finish()
+
+
+def _health_check_color(is_ok):
+    return 'green' if is_ok else 'red'
+
+
+def _health_check_is_quick(request_handler):
+    arg_value = request_handler.get_argument('quick', 'y')
+
+    if re.match(r'^(true|t|y|yes|1)$', arg_value, re.IGNORECASE):
+        return True
+
+    if re.match(r'^(false|f|n|no|0)$', arg_value, re.IGNORECASE):
+        return False
+
+    return None
+
+"""Used by ```generate_health_check_response()``` to indicate
+in a debug details HTTP header that processing the request failed
+because the ```is_quick``` query string argument was invalid.
+"""
+HEALTH_CHECK_GDD_INVALID_QUICK_ARGUMENT = 0x0001
+
+"""Used by ```generate_health_check_response()``` to indicate
+in a debug details HTTP header that processing the request failed
+because the generated response body was invalid which should really
+never happen.
+"""
+HEALTH_CHECK_GDD_INVALID_RESPONSE_BODY = 0x0002
+
+
+def generate_health_check_response(request_handler, async_health_check_class):
+    """Every service should have a health check endpoint. For a more
+    complete exploration of what the health check endpoint should do
+    see the microservice architectural guidance.
+    ```generate_health_check_response()``` is intended to make it
+    super easy to implement a health check endpoint.
+
+    Expected usage
+
+        import tor_async_util
+        from async_actions import AsyncHealthCheck
+
+        .
+        .
+        .
+
+        class UsersHealthRequestHandler(HealthRequestHandler):
+
+            url_spec = r'/v1.0/something/_health'
+
+            @tornado.web.asynchronous
+            def get(self):
+                tor_async_util.generate_health_check_response(self, AsyncHealthCheck)
+
+    A minimal AsyncHealthCheck implementation
+
+        class AsyncHealthCheck(object):
+
+            def __init__(self, is_quick, async_state=None):
+                object.__init__(self)
+
+                self.is_quick = is_quick
+                self.async_state = async_state
+
+            def check(self, callback):
+                if self.is_quick:
+                    details = None
+                else:
+                    details = {
+                        'other_service': True,
+                    }
+
+                callback(True, details, self)
+    """
+
+    is_quick = _health_check_is_quick(request_handler)
+    if is_quick is None:
+        request_handler.set_header('Content-Type', 'application/json; charset=UTF-8')
+        request_handler.write({})
+        request_handler.set_status(httplib.BAD_REQUEST)
+        request_handler.add_debug_details(HEALTH_CHECK_GDD_INVALID_QUICK_ARGUMENT)
+        request_handler.finish()
+        return
+
+    ahc = async_health_check_class(is_quick, async_state=request_handler)
+    ahc.check(_health_check_on_ahc_check_done)
+
+
+def _health_check_on_ahc_check_done(is_ok, details, ahc):
+    """```_health_check_on_ahc_check_done()``` is an async callback used
+    by ```generate_health_check_response()``` to finish processing of an
+    async health check request.
+    """
+    request_handler = ahc.async_state
+
+    location = '%s://%s%s' % (
+        request_handler.request.protocol,
+        request_handler.request.host,
+        request_handler.request.path,
+    )
+
+    body = {
+        'status': _health_check_color(is_ok),
+        'links': {
+            'self': {
+                'href': location,
+            },
+        },
+    }
+
+    if details:
+        body['details'] = {}
+        for (k, v) in details.iteritems():
+            body['details'][k] = _health_check_color(v)
+
+    if not request_handler.write_and_verify(body, jsonschemas.get_health_response):
+        request_handler.add_debug_details(HEALTH_CHECK_GDD_INVALID_RESPONSE_BODY)
+        request_handler.set_status(httplib.INTERNAL_SERVER_ERROR)
+        request_handler.finish()
+        return
+
+    request_handler.set_header('location', location)
+
+    request_handler.set_status(httplib.OK if is_ok else httplib.SERVICE_UNAVAILABLE)
+    request_handler.finish()
