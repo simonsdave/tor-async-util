@@ -541,10 +541,16 @@ def generate_noop_response(request_handler):
 
 
 def _health_check_color(is_ok):
+    """Used by ```generate_health_check_response()``` to turn
+    a boolean into a color.
+    """
     return 'green' if is_ok else 'red'
 
 
 def _health_check_is_quick(request_handler):
+    """Used by ```generate_health_check_response()``` to extract
+    and parse the 'quick' argument from a request's query string.
+    """
     arg_value = request_handler.get_argument('quick', 'y')
 
     if re.match(r'^(true|t|y|yes|1)$', arg_value, re.IGNORECASE):
@@ -555,11 +561,13 @@ def _health_check_is_quick(request_handler):
 
     return None
 
+
 """Used by ```generate_health_check_response()``` to indicate
 in a debug details HTTP header that processing the request failed
 because the ```is_quick``` query string argument was invalid.
 """
 HEALTH_CHECK_GDD_INVALID_QUICK_ARGUMENT = 0x0001
+
 
 """Used by ```generate_health_check_response()``` to indicate
 in a debug details HTTP header that processing the request failed
@@ -660,3 +668,20 @@ def _health_check_on_ahc_check_done(is_ok, details, ahc):
 
     request_handler.set_status(httplib.OK if is_ok else httplib.SERVICE_UNAVAILABLE)
     request_handler.finish()
+
+
+class AsyncHealthCheck(object):
+    """When a service uses ```generate_health_check_response()``` to implement
+    a health check endpoint, it's entirely possible that an async class will
+    not be required however ```generate_health_check_response()``` still
+    requires an async class. Hence the creation of this super simple class.
+    """
+
+    def __init__(self, is_quick, async_state=None):
+        object.__init__(self)
+
+        self.is_quick = is_quick
+        self.async_state = async_state
+
+    def check(self, callback):
+        callback(True, None, self)
