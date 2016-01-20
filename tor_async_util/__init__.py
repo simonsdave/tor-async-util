@@ -266,6 +266,21 @@ class RequestHandler(tornado.web.RequestHandler):
 
         return True
 
+    def write_bad_request_response(self, debug_details=None):
+        """```write_bad_request_response()``` implements a common response
+        pattern when responding to some form of bad input:
+
+            1/ write empty json doc in response body
+            2/ set content type to json
+            3/ set status to bad request
+            4/ possibily set the debug details header
+        """
+        self.set_header('Content-Type', 'application/json; charset=UTF-8')
+        self.write({})
+        self.set_status(httplib.BAD_REQUEST)
+        if debug_details is not None:
+            self.add_debug_details(debug_details)
+
     # GBAC = Get Basic Auth Creds
     GBAC_OK = 0x0000
     GBAC_NO_AUTHORIZATION_HEADER = 0x0001
@@ -598,13 +613,9 @@ def generate_health_check_response(request_handler, async_health_check_class):
 
                 callback(True, details, self)
     """
-
     is_quick = _health_check_is_quick(request_handler)
     if is_quick is None:
-        request_handler.set_header('Content-Type', 'application/json; charset=UTF-8')
-        request_handler.write({})
-        request_handler.set_status(httplib.BAD_REQUEST)
-        request_handler.add_debug_details(HEALTH_CHECK_GDD_INVALID_QUICK_ARGUMENT)
+        request_handler.write_bad_request_response(HEALTH_CHECK_GDD_INVALID_QUICK_ARGUMENT)
         request_handler.finish()
         return
 

@@ -820,6 +820,49 @@ class WriteAndVerifyTestCase(tornado.testing.AsyncHTTPTestCase):
         self.assertEqual(response.code, httplib.BAD_REQUEST)
 
 
+class TestWriteBadRequestResponseRequestHandler(tor_async_util.RequestHandler):
+    """This class is only used by ```WriteBadRequestResponseTestCase```."""
+
+    url_spec = r'/dave'
+
+    @tornado.web.asynchronous
+    def get(self):
+        debug_details = self.get_argument('debug_details', None)
+        if debug_details is None:
+            self.write_bad_request_response()
+        else:
+            self.write_bad_request_response(int(debug_details))
+        self.finish()
+
+
+class WriteBadRequestResponseTestCase(RequestHandlerTestCase):
+    """A collection of unit tests for RequestHandler.write_and_verify."""
+
+    def get_app(self):
+        handlers = [
+            (
+                TestWriteBadRequestResponseRequestHandler.url_spec,
+                TestWriteBadRequestResponseRequestHandler
+            ),
+        ]
+        return tornado.web.Application(handlers=handlers)
+
+    def test_no_debug_detail(self):
+        response = self.fetch(
+            TestWriteBadRequestResponseRequestHandler.url_spec,
+            method='GET')
+        self.assertEqual(response.code, httplib.BAD_REQUEST)
+        self.assertNoDebugDetail(response)
+
+    def test_with_debug_detail(self):
+        debug_detail = 42
+        response = self.fetch(
+            '%s?debug_details=%d' % (TestWriteBadRequestResponseRequestHandler.url_spec, debug_detail),
+            method='GET')
+        self.assertEqual(response.code, httplib.BAD_REQUEST)
+        self.assertDebugDetail(response, debug_detail)
+
+
 class TestSetStatusRequestHandler(tor_async_util.RequestHandler):
     """This class is used by ```SetStatusTestCase```."""
 
