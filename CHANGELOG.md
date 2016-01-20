@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 Format of this file follows [these](http://keepachangelog.com/) guidelines.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.9.0] - [2016-01-20]
+### Added
+- added AsyncHealthCheck
+
 ## [1.8.0] - [2016-01-19]
 ### Added
 - added generate_noop_response() for generating noop responses
