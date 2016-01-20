@@ -1337,32 +1337,13 @@ class NoOpTestCase(RequestHandlerTestCase):
         self.assertNoDebugDetail(response)
 
 
-class AsyncHealthCheck(object):
-
-    def __init__(self, is_quick, async_state=None):
-        object.__init__(self)
-
-        self.is_quick = is_quick
-        self.async_state = async_state
-
-    def check(self, callback):
-        if self.is_quick:
-            details = None
-        else:
-            details = {
-                'other_service': True,
-            }
-
-        callback(True, details, self)
-
-
 class HealthCheckRequestHandler(tor_async_util.RequestHandler):
 
     url_spec = r'/_health'
 
     @tornado.web.asynchronous
     def get(self):
-        tor_async_util.generate_health_check_response(self, AsyncHealthCheck)
+        tor_async_util.generate_health_check_response(self, tor_async_util.AsyncHealthCheck)
 
 
 class HealthCheckTestCase(RequestHandlerTestCase):
@@ -1376,6 +1357,30 @@ class HealthCheckTestCase(RequestHandlerTestCase):
             ),
         ]
         return tornado.web.Application(handlers=handlers)
+
+    def test_happy_path_with_details(self):
+        the_details = {
+            'dave': 'was',
+            'here': 'yesterday',
+            'and': 'today',
+        }
+
+        def check_patch(ahc, callback):
+            callback(True, the_details, ahc)
+
+        with mock.patch(__name__ + '.tor_async_util.AsyncHealthCheck.check', check_patch):
+            response = self.fetch(HealthCheckRequestHandler.url_spec, method='GET')
+            self.assertEqual(response.code, httplib.OK)
+            self.assertNoDebugDetail(response)
+
+    def test_happy_path_with_service_unavailable(self):
+        def check_patch(ahc, callback):
+            callback(False, None, ahc)
+
+        with mock.patch(__name__ + '.tor_async_util.AsyncHealthCheck.check', check_patch):
+            response = self.fetch(HealthCheckRequestHandler.url_spec, method='GET')
+            self.assertEqual(response.code, httplib.SERVICE_UNAVAILABLE)
+            self.assertNoDebugDetail(response)
 
     def test_happy_path_no_is_quick(self):
         response = self.fetch(HealthCheckRequestHandler.url_spec, method='GET')
