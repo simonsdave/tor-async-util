@@ -17,7 +17,7 @@ Capability highlights:
   not found response - see ```DefaultRequestHandler()```
 
 * an abstract base class from which all request handler classes can be
-  derived and thus provide derived classes access to:
+  derived to provide
 
   - read and write json requests and responses optionally verifying
     each against a jsonschema - see ```RequestHandler.get_json_request_body()```
