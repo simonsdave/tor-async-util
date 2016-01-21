@@ -7,28 +7,35 @@ when implementing RESTful APIs using [Tornado's](http://www.tornadoweb.org/en/st
 
 Capability highlights:
 
-- when async curl httpclient is used, it's useful to know if libcurl
-was compiled with an async dns resolver - see ```is_libcurl_compiled_with_async_dns_resolver()```
-- instead of CTRL+C generating an unfriendly stack trace install
-a signal handler - see ```install_sigint_handler()```
-- a default request handler which generates a RESTful API friendly
-not found response - see ```DefaultRequestHandler()```
-- an abstract base class from which all request handler classes can be
-derived and thus provide derived classes access to:
+* when async curl httpclient is used, it's useful to know if libcurl
+  was compiled with an async dns resolver - see ```is_libcurl_compiled_with_async_dns_resolver()```
+
+* instead of CTRL+C generating an unfriendly stack trace install
+  a signal handler - see ```install_sigint_handler()```
+
+* a default request handler which generates a RESTful API friendly
+  not found response - see ```DefaultRequestHandler()```
+
+* an abstract base class from which all request handler classes can be
+  derived and thus provide derived classes access to:
 
   - read and write json requests and responses optionally verifying
     each against a jsonschema - see ```RequestHandler.get_json_request_body()```
     and ```RequestHandler.write_and_verify()```
+
   - accessing decoded BASIC auth credentials - see ```RequestHandler.get_basic_auth_creds()```
+
   - augment Tornado's default ```set_status()``` with support for additional
     status codes - see ```RequestHandler.set_status()```
+
   - override Tornado's default ```write_error()``` so a json response body is
     generated rather than the default HTML response body - see ```RequestHandler.write_error()```
 
 
 - thin wrapper around ```ConfigParser.ConfigParser``` to parse ini files
-for things settings such as logging levels, keyczar crypters and keyczar
-signers - see ```Config```
+  for things settings such as logging levels, keyczar crypters and keyczar
+  signers - see ```Config```
+
 - core implementations of ```/_noop``` and ```/_health``` endpoints
-include async health checkers - see ```generate_noop_response()```,
-```generate_health_check_response()``` and ```AsyncHealthCheck```
+  include async health checkers - see ```generate_noop_response()```,
+  ```generate_health_check_response()``` and ```AsyncHealthCheck```
