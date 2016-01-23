@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 Format of this file follows [these](http://keepachangelog.com/) guidelines.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.10.0] - [2016-xx-xx]
+### Added
+- added write_http_client_response_to_log()
+
 ## [1.9.0] - [2016-01-20]
 ### Added
 - added AsyncHealthCheck

@@ -19,17 +19,17 @@ import tornado.web
 import jsonschemas
 
 
-__version__ = "1.10.0"
+__version__ = '1.10.0'
 
 
-_logger = logging.getLogger("tor_async_util.%s" % __name__)
+_logger = logging.getLogger('tor_async_util')
 
 
 """If a debug details header is included in a response,
 ```debug_details_header_name``` is the name of the HTTP
 header.
 """
-debug_details_header_name = "X-Debug-Detail"
+debug_details_header_name = 'X-Debug-Detail'
 
 
 def is_libcurl_compiled_with_async_dns_resolver():
@@ -685,3 +685,54 @@ class AsyncHealthCheck(object):
 
     def check(self, callback):
         callback(True, None, self)
+
+
+def write_http_client_response_to_log(logger,
+                                      response,
+                                      service,
+                                      severity=logging.INFO):
+    """write a message to ```logger`` which can be easily parsed
+    by performance analysis tools and used to understand
+    performance bottlenecks.
+
+    ```logger``` is expected to be an instance of ```logging.Logger``` typically
+    created by calling ```logging.getLogger()```
+
+    http://tornado.readthedocs.org/en/latest/httpclient.html#response-objects
+    explains that the time_info attribute of a tornado response
+    object contains timing details of the phases of a request which
+    is available when using the cURL http client. a description
+    of these timing details can be found at
+    http://curl.haxx.se/libcurl/c/curl_easy_getinfo.html#TIMES
+    and it is these detailed timings which are written to ```logger```
+    """
+    fmt = (
+        '\'{service}\' took {request_time:.2f} ms to respond '
+        'with {http_response_code:d} to \'{http_method}\' '
+        'against >>>{url}<<< - timing detail: '
+        'q={queue:.2f} ms n={namelookup:.2f} ms '
+        'c={connect:.2f} ms p={pretransfer:.2f} ms '
+        's={starttransfer:.2f} ms t={total:.2f} ms r={redirect:.2f} ms'
+    )
+    msg_format_args = {
+        'service': service,
+        'request_time': response.request_time * 1000,
+        'http_response_code': response.code,
+        'http_method': response.request.method,
+        'url': response.effective_url,
+    }
+
+    def add_time_info_to_msg_format_args(key):
+        msg_format_args[key] = response.time_info.get(key, 0) * 1000
+
+    add_time_info_to_msg_format_args('queue')
+    add_time_info_to_msg_format_args('namelookup')
+    add_time_info_to_msg_format_args('connect')
+    add_time_info_to_msg_format_args('pretransfer')
+    add_time_info_to_msg_format_args('starttransfer')
+    add_time_info_to_msg_format_args('total')
+    add_time_info_to_msg_format_args('redirect')
+
+    msg = fmt.format(**msg_format_args)
+
+    logger.log(severity, msg)

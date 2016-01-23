@@ -39,3 +39,19 @@ Capabilities:
 - core implementations of ```/_noop``` and ```/_health``` endpoints
   include async health checkers - see ```generate_noop_response()```,
   ```generate_health_check_response()``` and ```AsyncHealthCheck```
+
+- [this](http://tornado.readthedocs.org/en/latest/httpclient.html#response-objects)
+  explains that the time_info attribute of a tornado response
+  object contains timing details of the phases of a request which
+  is available when using the cURL http client. a description
+  of these timing details can be found at
+  [here](http://curl.haxx.se/libcurl/c/curl_easy_getinfo.html#TIMES).
+  these timings are very, very helpful in understanding latencies from
+  interactions between microservices - see ```write_http_client_response_to_log()```.
+  an example of what the logs look like is below
+
+```
+2016-01-23T03:45:53.362+00:00 INFO async_docker_remote_api 'Remote Docker API' took 3.42 ms to
+respond with 200 to 'GET' against >>>http://127.0.0.1:4243/containers/cid/logs?stdout=1<<< - timing
+detail: q=0.13 ms n=0.03 ms c=0.04 ms p=1.65 ms s=1.66 ms t=1.83 ms r=0.00 ms
+```
