@@ -1409,6 +1409,128 @@ class HealthCheckTestCase(RequestHandlerTestCase):
             self.assertDebugDetail(response, tor_async_util.HEALTH_CHECK_GDD_INVALID_RESPONSE_BODY)
 
 
+class WriteHttpClientResponseToLogTestCase(unittest.TestCase):
+    """A set of unit tests for ```write_http_client_response_to_log()```."""
+
+    def test_with_time_info(self):
+        logger = mock.Mock()
+
+        response = mock.Mock(
+            code=httplib.OK,
+            error=None,
+            body=json.dumps({}),
+            time_info={
+                "queue": 1,
+                "namelookup": 2,
+                "connect": 3,
+                "pretransfer": 4,
+                "starttransfer": 5,
+                "total": 6,
+                "redirect": 7,
+            },
+            request_time=0.042,
+            effective_url="http://172.17.42.1:4001/v2/keys/key-value",
+            request=mock.Mock(method="GET"))
+
+        service = 'my service'
+
+        tor_async_util.write_http_client_response_to_log(
+            logger,
+            response,
+            service)
+
+        expected_info_message_fmt = (
+            "'%s' took %.2f ms to respond with "
+            "%d to '%s' against >>>%s<<< - "
+            "timing detail: "
+            "q=%.2f ms n=%.2f ms c=%.2f ms p=%.2f ms s=%.2f ms t=%.2f ms r=%.2f ms"
+        )
+        expected_info_message = expected_info_message_fmt % (
+            service,
+            response.request_time * 1000,
+            response.code,
+            response.request.method,
+            response.effective_url,
+            response.time_info["queue"] * 1000,
+            response.time_info["namelookup"] * 1000,
+            response.time_info["connect"] * 1000,
+            response.time_info["pretransfer"] * 1000,
+            response.time_info["starttransfer"] * 1000,
+            response.time_info["total"] * 1000,
+            response.time_info["redirect"] * 1000)
+
+        logger.log.assert_called_once_with(logging.INFO, expected_info_message)
+
+    def test_with_no_time_info(self):
+        logger = mock.Mock()
+
+        response = mock.Mock(
+            code=httplib.OK,
+            error=None,
+            body=json.dumps({}),
+            time_info={},
+            request_time=0.042,
+            effective_url="http://172.17.42.1:4001/v2/keys/key-value",
+            request=mock.Mock(method="GET"))
+
+        service = 'my service'
+
+        tor_async_util.write_http_client_response_to_log(
+            logger,
+            response,
+            service)
+
+        expected_info_message_fmt = (
+            "'%s' took %.2f ms to respond with "
+            "%d to '%s' against >>>%s<<< - "
+            "timing detail: "
+            "q=0.00 ms n=0.00 ms c=0.00 ms p=0.00 ms s=0.00 ms t=0.00 ms r=0.00 ms"
+        )
+        expected_info_message = expected_info_message_fmt % (
+            service,
+            response.request_time * 1000,
+            response.code,
+            response.request.method,
+            response.effective_url)
+
+        logger.log.assert_called_once_with(logging.INFO, expected_info_message)
+
+    def test_with_error_log_severity(self):
+        logger = mock.Mock()
+
+        response = mock.Mock(
+            code=httplib.OK,
+            error=None,
+            body=json.dumps({}),
+            time_info={},
+            request_time=0.042,
+            effective_url="http://172.17.42.1:4001/v2/keys/key-value",
+            request=mock.Mock(method="GET"))
+
+        service = 'my service'
+
+        tor_async_util.write_http_client_response_to_log(
+            logger,
+            response,
+            service,
+            logging.ERROR)
+
+        expected_info_message_fmt = (
+            "'%s' took %.2f ms to respond with "
+            "%d to '%s' against >>>%s<<< - "
+            "timing detail: "
+            "q=0.00 ms n=0.00 ms c=0.00 ms p=0.00 ms s=0.00 ms t=0.00 ms r=0.00 ms"
+        )
+        expected_info_message = expected_info_message_fmt % (
+            service,
+            response.request_time * 1000,
+            response.code,
+            response.request.method,
+            response.effective_url)
+
+        logger.log.assert_called_once_with(logging.ERROR, expected_info_message)
+
+
 class AsyncActionTestCase(unittest.TestCase):
 
     def test_ctr(self):
