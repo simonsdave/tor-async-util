@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 Format of this file follows [these](http://keepachangelog.com/) guidelines.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.10.0] - [2016-xx-xx]
+## [1.10.0] - [2016-01-24]
 ### Added
 - added tor_async_util.write_http_client_response_to_log()
 - added tor_async_util_nosetests.py and tor_async_util.FileCapture
