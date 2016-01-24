@@ -736,3 +736,12 @@ def write_http_client_response_to_log(logger,
     msg = fmt.format(**msg_format_args)
 
     logger.log(severity, msg)
+
+
+class AsyncAction(object):
+    """Abstract base class for any async actions."""
+
+    def __init__(self, async_state):
+        object.__init__(self)
+
+        self.async_state = async_state

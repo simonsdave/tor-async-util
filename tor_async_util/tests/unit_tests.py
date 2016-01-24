@@ -1407,3 +1407,11 @@ class HealthCheckTestCase(RequestHandlerTestCase):
             response = self.fetch(HealthCheckRequestHandler.url_spec, method='GET')
             self.assertEqual(response.code, httplib.INTERNAL_SERVER_ERROR)
             self.assertDebugDetail(response, tor_async_util.HEALTH_CHECK_GDD_INVALID_RESPONSE_BODY)
+
+
+class AsyncActionTestCase(unittest.TestCase):
+
+    def test_ctr(self):
+        async_state = mock.Mock()
+        aa = tor_async_util.AsyncAction(async_state)
+        self.assertTrue(aa.async_state is async_state)

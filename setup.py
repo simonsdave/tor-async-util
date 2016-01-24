@@ -38,7 +38,6 @@ setup(
     name="tor_async_util",
     packages=[
         "tor_async_util",
-        "tor_async_util.nose_plugins",
     ],
     scripts=[
         "bin/tor_async_util_nosetests.py",

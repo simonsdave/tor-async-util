@@ -5,7 +5,17 @@ tor-async-util is a set of utilities that are useful
 when implementing RESTful APIs using [Tornado's](http://www.tornadoweb.org/en/stable/)
 [Asynchronous and non-Blocking I/O](http://tornado.readthedocs.org/en/latest/guide/async.html).
 
-Capabilities:
+## Assumptions
+
+* generally following [these](https://github.com/simonsdave/microservice-architecture)
+  architectural guidelines
+
+* application architecture follows the [Data, context and interaction (DCI)](http://en.wikipedia.org/wiki/Data,_context_and_interaction) paradigm where:
+  * *data* = model classes
+  * *context* = request handler classes
+  * *interaction* = async action classes
+
+## Capabilities
 
 * when async curl httpclient is used, it's useful to know if libcurl
   was compiled with an async dns resolver - see ```is_libcurl_compiled_with_async_dns_resolver()```

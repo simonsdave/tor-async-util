@@ -5,8 +5,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.10.0] - [2016-xx-xx]
 ### Added
-- added write_http_client_response_to_log()
+- added tor_async_util.write_http_client_response_to_log()
 - added tor_async_util_nosetests.py and tor_async_util.FileCapture
+- added tor_async_util.AsyncAction
 
 ## [1.9.0] - [2016-01-20]
 ### Added
