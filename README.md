@@ -55,3 +55,16 @@ Capabilities:
 respond with 200 to 'GET' against >>>http://127.0.0.1:4243/containers/cid/logs?stdout=1<<< - timing
 detail: q=0.13 ms n=0.03 ms c=0.04 ms p=1.65 ms s=1.66 ms t=1.83 ms r=0.00 ms
 ```
+
+- integration tests often run database installer(s),
+  start up service(s) and then direct various requests at the
+  service(s). when the tests fail it's very useful to output the
+  logs associated with the installers and services. The nose
+  plug-in ```tor_async_util.nose_plugins.FileCapture``` is used
+  in integration tests to identify the files that should be displayed
+  on test failure. in order for ```tor_async_util.nose_plugins.FileCapture```
+  to work as desired it must be registered prior to running tests.
+  ```tor_async_util_nosetests.py``` is responsible for registering
+  ```tor_async_util.nose_plugins.FileCapture``` and is as a replacement
+  for ```nosetests``` as per the instructions documented
+  [here](http://nose.readthedocs.org/en/latest/api/core.html#nose.core.TestProgram)
