@@ -1337,6 +1337,14 @@ class NoOpTestCase(RequestHandlerTestCase):
         self.assertNoDebugDetail(response)
 
 
+class AsyncActionTestCase(unittest.TestCase):
+
+    def test_ctr(self):
+        async_state = mock.Mock()
+        aa = tor_async_util.AsyncAction(async_state)
+        self.assertTrue(aa.async_state is async_state)
+
+
 class HealthCheckRequestHandler(tor_async_util.RequestHandler):
 
     url_spec = r'/_health'
@@ -1358,24 +1366,147 @@ class HealthCheckTestCase(RequestHandlerTestCase):
         ]
         return tornado.web.Application(handlers=handlers)
 
-    def test_happy_path_with_details(self):
+    def test_happy_path_with_details_all_ok(self):
         the_details = {
-            'dave': 'was',
-            'here': 'yesterday',
-            'and': 'today',
+            'dave': True,
+            'here': True,
+            'and': True,
         }
 
         def check_patch(ahc, callback):
-            callback(True, the_details, ahc)
+            callback(the_details, ahc)
 
         with mock.patch(__name__ + '.tor_async_util.AsyncHealthCheck.check', check_patch):
             response = self.fetch(HealthCheckRequestHandler.url_spec, method='GET')
             self.assertEqual(response.code, httplib.OK)
             self.assertNoDebugDetail(response)
+            expected_response_body = {
+                'status': 'green',
+                'details': {
+                    'dave': 'green',
+                    'here': 'green',
+                    'and': 'green',
+                },
+                'links': {
+                    'self': {
+                        'href': response.effective_url,
+                    }
+                }
+            }
+            self.assertEqual(json.loads(response.body), expected_response_body)
+
+    def test_happy_path_with_multi_level_details_all_ok(self):
+        the_details = {
+            'component1': True,
+            'component2': {
+                'subcomponent1': True,
+                'subcomponent2': True,
+                'subcomponent3': True,
+            },
+            'component3': True,
+        }
+
+        def check_patch(ahc, callback):
+            callback(the_details, ahc)
+
+        with mock.patch(__name__ + '.tor_async_util.AsyncHealthCheck.check', check_patch):
+            response = self.fetch(HealthCheckRequestHandler.url_spec, method='GET')
+            self.assertEqual(response.code, httplib.OK)
+            self.assertNoDebugDetail(response)
+            expected_response_body = {
+                'status': 'green',
+                'details': {
+                    'component1': 'green',
+                    'component2': {
+                        'status': 'green',
+                        'details': {
+                            'subcomponent1': 'green',
+                            'subcomponent2': 'green',
+                            'subcomponent3': 'green',
+                        },
+                    },
+                    'component3': 'green',
+                },
+                'links': {
+                    'self': {
+                        'href': response.effective_url,
+                    }
+                }
+            }
+            self.assertEqual(json.loads(response.body), expected_response_body)
+
+    def test_happy_path_with_details_one_component_in_error(self):
+        the_details = {
+            'dave': True,
+            'here': False,
+            'and': True,
+        }
+
+        def check_patch(ahc, callback):
+            callback(the_details, ahc)
+
+        with mock.patch(__name__ + '.tor_async_util.AsyncHealthCheck.check', check_patch):
+            response = self.fetch(HealthCheckRequestHandler.url_spec, method='GET')
+            self.assertEqual(response.code, httplib.SERVICE_UNAVAILABLE)
+            self.assertNoDebugDetail(response)
+            expected_response_body = {
+                'status': 'red',
+                'details': {
+                    'dave': 'green',
+                    'here': 'red',
+                    'and': 'green',
+                },
+                'links': {
+                    'self': {
+                        'href': response.effective_url,
+                    }
+                }
+            }
+            self.assertEqual(json.loads(response.body), expected_response_body)
+
+    def test_happy_path_with_multi_level_details_with_error_leaf_components(self):
+        the_details = {
+            'component1': True,
+            'component2': {
+                'subcomponent1': True,
+                'subcomponent2': False,
+                'subcomponent3': True,
+            },
+            'component3': True,
+        }
+
+        def check_patch(ahc, callback):
+            callback(the_details, ahc)
+
+        with mock.patch(__name__ + '.tor_async_util.AsyncHealthCheck.check', check_patch):
+            response = self.fetch(HealthCheckRequestHandler.url_spec, method='GET')
+            self.assertEqual(response.code, httplib.SERVICE_UNAVAILABLE)
+            self.assertNoDebugDetail(response)
+            expected_response_body = {
+                'status': 'red',
+                'details': {
+                    'component1': 'green',
+                    'component2': {
+                        'status': 'red',
+                        'details': {
+                            'subcomponent1': 'green',
+                            'subcomponent2': 'red',
+                            'subcomponent3': 'green',
+                        },
+                    },
+                    'component3': 'green',
+                },
+                'links': {
+                    'self': {
+                        'href': response.effective_url,
+                    }
+                }
+            }
+            self.assertEqual(json.loads(response.body), expected_response_body)
 
     def test_happy_path_with_service_unavailable(self):
         def check_patch(ahc, callback):
-            callback(False, None, ahc)
+            callback({'some component': False}, ahc)
 
         with mock.patch(__name__ + '.tor_async_util.AsyncHealthCheck.check', check_patch):
             response = self.fetch(HealthCheckRequestHandler.url_spec, method='GET')
@@ -1529,11 +1660,3 @@ class WriteHttpClientResponseToLogTestCase(unittest.TestCase):
             response.effective_url)
 
         logger.log.assert_called_once_with(logging.ERROR, expected_info_message)
-
-
-class AsyncActionTestCase(unittest.TestCase):
-
-    def test_ctr(self):
-        async_state = mock.Mock()
-        aa = tor_async_util.AsyncAction(async_state)
-        self.assertTrue(aa.async_state is async_state)

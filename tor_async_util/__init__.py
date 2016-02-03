@@ -619,7 +619,7 @@ def generate_health_check_response(request_handler, async_health_check_class):
                         'other_service': True,
                     }
 
-                callback(True, details, self)
+                callback(details, self)
     """
     is_quick = _health_check_is_quick(request_handler)
     if is_quick is None:
@@ -631,7 +631,7 @@ def generate_health_check_response(request_handler, async_health_check_class):
     ahc.check(_health_check_on_ahc_check_done)
 
 
-def _health_check_on_ahc_check_done(is_ok, details, ahc):
+def _health_check_on_ahc_check_done(details, ahc):
     """```_health_check_on_ahc_check_done()``` is an async callback used
     by ```generate_health_check_response()``` to finish processing of an
     async health check request.
@@ -645,18 +645,13 @@ def _health_check_on_ahc_check_done(is_ok, details, ahc):
     )
 
     body = {
-        'status': _health_check_color(is_ok),
         'links': {
             'self': {
                 'href': location,
             },
         },
     }
-
-    if details:
-        body['details'] = {}
-        for (k, v) in details.iteritems():
-            body['details'][k] = _health_check_color(v)
+    body.update(_health_check_gen_response_body(details))
 
     if not request_handler.write_and_verify(body, jsonschemas.get_health_response):
         request_handler.add_debug_details(HEALTH_CHECK_GDD_INVALID_RESPONSE_BODY)
@@ -666,11 +661,44 @@ def _health_check_on_ahc_check_done(is_ok, details, ahc):
 
     request_handler.set_header('location', location)
 
-    request_handler.set_status(httplib.OK if is_ok else httplib.SERVICE_UNAVAILABLE)
+    request_handler.set_status(httplib.OK if body['status'] == _health_check_color(True) else httplib.SERVICE_UNAVAILABLE)
     request_handler.finish()
 
 
-class AsyncHealthCheck(object):
+def _health_check_gen_response_body(details):
+    """A private function only used by ```_health_check_on_ahc_check_done()```
+    to recursively generate. The "status" portion of the health endpoint's
+    response. ```details``` is expected to be produced by an AsyncHealthCheck
+    implementation.
+    """
+    rv = {
+        'status': _health_check_color(True),
+    }
+    if details:
+        rv['details'] = {}
+        for (component, value) in details.iteritems():
+            if isinstance(value, dict):
+                rv['details'][component] = _health_check_gen_response_body(value)
+                if rv['details'][component]['status'] == _health_check_color(False):
+                    rv['status'] = _health_check_color(False)
+            else:
+                assert isinstance(value, bool)
+                rv['details'][component] = _health_check_color(value)
+                if not value:
+                    rv['status'] = _health_check_color(False)
+    return rv
+
+
+class AsyncAction(object):
+    """Abstract base class for any async actions."""
+
+    def __init__(self, async_state):
+        object.__init__(self)
+
+        self.async_state = async_state
+
+
+class AsyncHealthCheck(AsyncAction):
     """When a service uses ```generate_health_check_response()``` to implement
     a health check endpoint, it's entirely possible that an async class will
     not be required however ```generate_health_check_response()``` still
@@ -678,13 +706,12 @@ class AsyncHealthCheck(object):
     """
 
     def __init__(self, is_quick, async_state=None):
-        object.__init__(self)
+        AsyncAction.__init__(self, async_state)
 
         self.is_quick = is_quick
-        self.async_state = async_state
 
     def check(self, callback):
-        callback(True, None, self)
+        callback(None, self)
 
 
 def write_http_client_response_to_log(logger,
@@ -736,12 +763,3 @@ def write_http_client_response_to_log(logger,
     msg = fmt.format(**msg_format_args)
 
     logger.log(severity, msg)
-
-
-class AsyncAction(object):
-    """Abstract base class for any async actions."""
-
-    def __init__(self, async_state):
-        object.__init__(self)
-
-        self.async_state = async_state
