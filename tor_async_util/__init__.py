@@ -661,7 +661,9 @@ def _health_check_on_ahc_check_done(details, ahc):
 
     request_handler.set_header('location', location)
 
-    request_handler.set_status(httplib.OK if body['status'] == _health_check_color(True) else httplib.SERVICE_UNAVAILABLE)
+    status = httplib.OK if body['status'] == _health_check_color(True) else httplib.SERVICE_UNAVAILABLE
+    request_handler.set_status(status)
+
     request_handler.finish()
 
 
