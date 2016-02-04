@@ -14,11 +14,6 @@ when implementing RESTful APIs using [Tornado's](http://www.tornadoweb.org/en/st
 * generally following [these](https://github.com/simonsdave/microservice-architecture)
   architectural guidelines
 
-* application architecture follows the [Data, context and interaction (DCI)](http://en.wikipedia.org/wiki/Data,_context_and_interaction) paradigm where:
-  * *data* = model classes
-  * *context* = request handler classes
-  * *interaction* = async action classes
-
 ## Capabilities
 
 * when async curl httpclient is used, it's useful to know if libcurl
