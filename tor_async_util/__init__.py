@@ -493,6 +493,54 @@ class Config(object):
             return value_if_not_found
 
 
+"""```GVR_INVALID_RESPONSE_BODY``` is used in ```generate_version_response()```
+to indicate that an invalid response body has been generated. This should
+never happen!
+"""
+GVR_INVALID_RESPONSE_BODY = 0x0001
+
+
+def generate_version_response(request_handler, version):
+    """This function encapsulates all the functionality required
+    to generate a response to a version request.
+
+        import tor_async_util
+
+        class ServiceVersionRequestHandler(tor_async_util.RequestHandler):
+
+            url_spec = r'/v1.0/service/_version'
+
+            @tornado.web.asynchronous
+            def get(self):
+                tor_async_util.generate_version_response(self, '1.0.56')
+    """
+    location = '%s://%s%s' % (
+        request_handler.request.protocol,
+        request_handler.request.host,
+        request_handler.request.path,
+    )
+
+    body = {
+        'version': version,
+        'links': {
+            'self': {
+                'href': location,
+            },
+        },
+    }
+
+    if not request_handler.write_and_verify(body, jsonschemas.get_version_response):
+        request_handler.add_debug_details(GVR_INVALID_RESPONSE_BODY)
+        request_handler.set_status(httplib.INTERNAL_SERVER_ERROR)
+        request_handler.finish()
+        return
+
+    request_handler.set_header('Location', location)
+
+    request_handler.set_status(httplib.OK)
+    request_handler.finish()
+
+
 """```GNR_INVALID_RESPONSE_BODY``` is used in ```generate_noop_response()```
 to indicate that an invalid response body has been generated. This should
 never happen!

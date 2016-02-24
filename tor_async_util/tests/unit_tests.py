@@ -1304,6 +1304,42 @@ class AddDebugDetailsTestCase(RequestHandlerTestCase):
         self._test_debug_details(False)
 
 
+class TestVersionRequestHandler(tor_async_util.RequestHandler):
+
+    url_spec = r'/_version'
+
+    @tornado.web.asynchronous
+    def get(self):
+        version = self.get_argument('version', None)
+        tor_async_util.generate_version_response(self, version)
+
+
+class VersionTestCase(RequestHandlerTestCase):
+    """Unit tests for generate_version_response()."""
+
+    def get_app(self):
+        handlers = [
+            (
+                TestVersionRequestHandler.url_spec,
+                TestVersionRequestHandler
+            ),
+        ]
+        return tornado.web.Application(handlers=handlers)
+
+    def test_bad_response_body(self):
+        with WriteAndVerifyPatcher(is_ok=False):
+            url = '%s?version=%s' % (TestVersionRequestHandler.url_spec, '0.1.0')
+            response = self.fetch(url, method='GET')
+            self.assertEqual(response.code, httplib.INTERNAL_SERVER_ERROR)
+            self.assertDebugDetail(response, tor_async_util.GVR_INVALID_RESPONSE_BODY)
+
+    def test_happy_path(self):
+        url = '%s?version=%s' % (TestVersionRequestHandler.url_spec, '0.1.0')
+        response = self.fetch(url, method='GET')
+        self.assertEqual(response.code, httplib.OK)
+        self.assertNoDebugDetail(response)
+
+
 class TestNoOpRequestHandler(tor_async_util.RequestHandler):
 
     url_spec = r'/_noop'

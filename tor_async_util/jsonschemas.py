@@ -15,3 +15,5 @@ def _load_jsonschema(schema_name):
 get_noop_response = _load_jsonschema('get_noop_response')
 
 get_health_response = _load_jsonschema('get_health_response')
+
+get_version_response = _load_jsonschema('get_version_response')
