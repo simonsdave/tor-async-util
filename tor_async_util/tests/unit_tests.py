@@ -1306,7 +1306,7 @@ class AddDebugDetailsTestCase(RequestHandlerTestCase):
 
 class TestNoOpRequestHandler(tor_async_util.RequestHandler):
 
-    url_spec = r'/bindle'
+    url_spec = r'/_noop'
 
     @tornado.web.asynchronous
     def get(self):
