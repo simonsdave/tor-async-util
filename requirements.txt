@@ -2,7 +2,7 @@
 -e .
 # dev & test ...
 flake8>=2.5.3
-mock==1.3.0
+mock==2.0.0
 nose==1.3.7
 nose-cov==1.6
 nose-pudb==1.0
