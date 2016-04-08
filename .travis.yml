@@ -8,6 +8,6 @@ script:
   - pep8
   - flake8
   - python setup.py sdist --formats=gztar
-  - nosetests --with-coverage --cover-branches --cover-erase
+  - nosetests --with-coverage --cover-branches --cover-erase --cover-package tor_async_util
 after_success:
   - coveralls || true
