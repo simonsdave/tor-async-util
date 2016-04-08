@@ -7,6 +7,7 @@ install:
 script:
   - pep8
   - flake8
+  - python setup.py sdist --formats=gztar
   - nosetests --with-coverage --cover-branches --cover-erase
 after_success:
   - coveralls || true
