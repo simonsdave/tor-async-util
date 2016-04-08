@@ -8,4 +8,5 @@ script:
   - pep8
   - flake8
   - nosetests --with-coverage --cover-branches --cover-erase
-  - coveralls
+after_success:
+  - coveralls || true
