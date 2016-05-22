@@ -44,7 +44,7 @@ setup(
     ],
     install_requires=[
         "jsonschema>=2.5.0",
-        "python-keyczar==0.715",
+        "python-keyczar==0.716",
     ],
     version=version,
     include_package_data=True,
