@@ -12,6 +12,7 @@ def _load_jsonschema(schema_name):
     with open(filename) as fp:
         return json.load(fp)
 
+
 get_noop_response = _load_jsonschema('get_noop_response')
 
 get_health_response = _load_jsonschema('get_health_response')
