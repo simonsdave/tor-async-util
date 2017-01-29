@@ -6,16 +6,28 @@
 #   >source cfg4dev
 #   >python setup.py sdist --formats=gztar
 #
+# update pypitest with both meta data and source distribution (FYI ...
+# use of pandoc is as per https://github.com/pypa/pypi-legacy/issues/148#issuecomment-226939424
+# since PyPI requires long description in RST but the repo's readme is in
+# markdown)
+#
+#   >pandoc README.md -o README.rst
+#   >python setup.py register -r pypitest
+#   >twine upload dist/* -r pypitest
+#
+# use the package uploaded to pypitest
+#
+#   >pip install -i https://testpypi.python.org/pypi tor_async_couchdb
+#
 import re
-
+import sys
 from setuptools import setup
 
 #
 # this approach used below to determine ```version``` was inspired by
 # https://github.com/kennethreitz/requests/blob/master/setup.py#L31
 #
-# why this complexity? wanted version number to be available in the
-# a runtime.
+# why the complexity? wanted a single spot for the version number
 #
 # the code below assumes the distribution is being built with the
 # current directory being the directory in which setup.py is stored
@@ -34,6 +46,43 @@ with open("tor_async_util/__init__.py", "r") as fd:
 if not version:
     raise Exception("Can't locate tor_async_util's version number")
 
+
+def _long_description():
+    """Assuming the following command is used to register the package
+        python setup.py register -r pypitest
+    then sys.argv should be
+        ['setup.py', 'register', '-r', 'pypitest']
+    """
+    if 2 <= len(sys.argv) and sys.argv[1] == 'register':
+        with open('README.rst', 'r') as f:
+            return f.read()
+
+    return 'a long description'
+
+
+_author = "Dave Simons"
+_author_email = "simonsdave@gmail.com"
+
+
+_keywords = [
+    'tornado',
+]
+
+
+# list of valid classifiers @ https://pypi.python.org/pypi?%3Aaction=list_classifiers
+_classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+
 setup(
     name="tor_async_util",
     packages=[
@@ -46,10 +95,17 @@ setup(
         "jsonschema>=2.5.0",
         "python-keyczar==0.716",
     ],
-    version=version,
     include_package_data=True,
+    version=version,
     description="Tornado Async Utilities",
-    author="Dave Simons",
-    author_email="simonsdave@gmail.com",
-    url="https://github.com/simonsdave/tor-async-util"
+    long_description=_long_description(),
+    author=_author,
+    author_email=_author_email,
+    maintainer=_author,
+    maintainer_email=_author_email,
+    license="MIT",
+    url="https://github.com/simonsdave/tor-async-util",
+    download_url="https://github.com/simonsdave/tor-async-util/tarball/v%s" % version,
+    keywords=_keywords,
+    classifiers=_classifiers,
 )

@@ -5,8 +5,6 @@ if [ -f "$PWD/requirements.txt" ]; then
         virtualenv env
         source "$PWD/env/bin/activate"
 
-        pip install pip==1.5.6
-
         pip install --requirement "$PWD/requirements.txt"
     fi
 
