@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 Format of this file follows [these](http://keepachangelog.com/) guidelines.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.13.0] - [2016-01-29]
+### Changed
+- python-keyczar 0.715 -> 0.716
+
 ## [1.12.0] - [2016-02-23]
 ### Added
 - added tor_async_util.generate_version_response()
