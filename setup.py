@@ -15,6 +15,10 @@
 #   >python setup.py register -r pypitest
 #   >twine upload dist/* -r pypitest
 #
+# you will be able to find the packaage at
+#
+#   https://testpypi.python.org/pypi/tor_async_util
+#
 # use the package uploaded to pypitest
 #
 #   >pip install -i https://testpypi.python.org/pypi tor_async_couchdb
