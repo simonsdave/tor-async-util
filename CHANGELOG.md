@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.13.1] - [2016-XX-XX]
 ### Added
-- ...
+- tornado 4.0.0 is a min pre-req
 
 ### Changed
 - ...
