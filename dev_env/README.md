@@ -61,40 +61,44 @@ Identity added: /home/vagrant/.ssh/id_rsa_github (/home/vagrant/.ssh/id_rsa_gith
 Clone the repo.
 
 ```bash
-~/> git clone git@github.com:simonsdave/tor-async-util.git
-~/>
+~> git clone git@github.com:simonsdave/tor-async-util.git
+Cloning into 'tor-async-util'...
+remote: Counting objects: 509, done.
+remote: Total 509 (delta 0), reused 0 (delta 0), pack-reused 509
+Receiving objects: 100% (509/509), 89.76 KiB | 0 bytes/s, done.
+Resolving deltas: 100% (295/295), done.
+Checking connectivity... done.
+~>
 ```
 
 Configure the dev environment
 
 ```bash
-~> cd clair-cicd/
-~/clair-cicd> source cfg4dev
+~> cd tor-async-util/
+~/tor-async-util> source cfg4dev
 New python executable in env/bin/python
 Installing setuptools, pip...done.
 .
 .
 .
 Cleaning up...
-(env)~/clair-cicd>
+(env)~/tor-async-util> 
 ```
 
 Run unit tests
 
 ```bash
-(env)~/clair-cicd> nosetests --with-coverage --cover-branches --cover-erase --cover-package clair_cicd
-.......................
-Name                     Stmts   Miss Branch BrPart  Cover
-----------------------------------------------------------
-clair_cicd/__init__.py       1      0      0      0   100%
-clair_cicd/assessor.py      10      0      4      0   100%
-clair_cicd/io.py            42      0     10      1    98%
-clair_cicd/models.py        31      0      0      0   100%
-----------------------------------------------------------
-TOTAL                       84      0     14      1    99%
+(env)~/tor-async-util> nosetests --with-coverage --cover-branches --cover-erase --cover-package tor_async_util
+.......................................................................
+Name                            Stmts   Miss Branch BrPart  Cover
+-----------------------------------------------------------------
+tor_async_util/__init__.py        304      0     66      0   100%
+tor_async_util/jsonschemas.py       9      0      0      0   100%
+-----------------------------------------------------------------
+TOTAL                             313      0     66      0   100%
 ----------------------------------------------------------------------
-Ran 23 tests in 0.031s
+Ran 71 tests in 0.620s
 
 OK
-(env)~/clair-cicd>
+(env)~/tor-async-util>
 ```
