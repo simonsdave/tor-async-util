@@ -6,12 +6,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [%RELEASE_VERSION%] - [%RELEASE_DATE%]
 
 ### Added
+
 - tornado 4.0.0 is a min pre-req
 
 ### Changed
-- ...
+
+- pep8 1.7.0 -> 1.7.1
 
 ### Removed
+
 - ...
 
 ## [1.13.0] - [2016-01-29]
