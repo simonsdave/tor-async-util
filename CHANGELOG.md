@@ -11,7 +11,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- pep8 1.7.0 -> 1.7.1
+- pep8 -> pycodestyle
 
 ### Removed
 
