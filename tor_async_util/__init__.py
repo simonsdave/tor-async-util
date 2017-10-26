@@ -308,7 +308,7 @@ class RequestHandler(tornado.web.RequestHandler):
 
         try:
             auth_hdr_val = base64.b64decode(auth_hdr_val)
-        except:
+        except Exception:
             return (None, None, self.GBAC_BAD_B64_ENCODING)
 
         pattern = "^\s*(?P<username>[^:]+):(?P<password>[^\s]+)\s*$"
