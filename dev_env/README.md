@@ -13,18 +13,19 @@ the VM you will use ```vagrant ssh```, ```vagrant halt```,
 ```vagrant up```, ```vagrant status```, etc).
 
 ```bash
->./create_dev_env.sh simonsdave simonsdave@gmail.com ~/.ssh/id_rsa.pub ~/.ssh/id_rsa
+> ./create_dev_env.sh simonsdave simonsdave@gmail.com ~/.ssh/id_rsa.pub ~/.ssh/id_rsa
 Bringing machine 'default' up with 'virtualbox' provider...
 ==> default: Importing base box 'trusty'...
 .
 .
 .
+>
 ```
 
 SSH into the VM.
 
 ```bash
->vagrant ssh
+> vagrant ssh
 Welcome to Ubuntu 14.04 LTS (GNU/Linux 3.13.0-27-generic x86_64)
 
  * Documentation:  https://help.ubuntu.com/
@@ -38,7 +39,7 @@ Welcome to Ubuntu 14.04 LTS (GNU/Linux 3.13.0-27-generic x86_64)
 0 updates are security updates.
 
 
-vagrant@vagrant-ubuntu-trusty-64:~$
+~>
 ```
 
 Start the ssh-agent in the background.
@@ -82,7 +83,7 @@ Installing setuptools, pip...done.
 .
 .
 Cleaning up...
-(env)~/tor-async-util> 
+(env)~/tor-async-util>
 ```
 
 Run unit tests
