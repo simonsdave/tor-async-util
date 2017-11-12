@@ -12,19 +12,17 @@
 # markdown)
 #
 #   >pandoc README.md -o README.rst
-#   >python setup.py register -r pypitest
-#   >twine upload dist/* -r pypitest
+#   >twine upload dist/* -r testpypi
 #
 # you will be able to find the packaage at
 #
-#   https://testpypi.python.org/pypi/tor_async_util
+#   https://test.pypi.org/project/tor-async-util
 #
 # use the package uploaded to pypitest
 #
-#   >pip install -i https://testpypi.python.org/pypi tor_async_couchdb
+#   >pip install -i https://testpypi.python.org/pypi tor-async-util
 #
 import re
-import sys
 from setuptools import setup
 
 #
@@ -52,16 +50,12 @@ if not version:
 
 
 def _long_description():
-    """Assuming the following command is used to register the package
-        python setup.py register -r pypitest
-    then sys.argv should be
-        ['setup.py', 'register', '-r', 'pypitest']
-    """
-    if 2 <= len(sys.argv) and sys.argv[1] == 'register':
+    try:
         with open('README.rst', 'r') as f:
             return f.read()
-
-    return 'a long description'
+    except IOError:
+        # simple fix to avoid failure on 'source cfg4dev'
+        return "a long description"
 
 
 _author = "Dave Simons"
