@@ -1,5 +1,5 @@
 # tor-async-util
-![Maintained](https://img.shields.io/maintenance/yes/2017.svg?style=flat)
+![Maintained](https://img.shields.io/maintenance/yes/2018.svg?style=flat)
 ![license](https://img.shields.io/pypi/l/tor-async-util.svg?style=flat)
 ![PythonVersions](https://img.shields.io/pypi/pyversions/tor-async-util.svg?style=flat)
 ![status](https://img.shields.io/pypi/status/tor-async-util.svg?style=flat)
