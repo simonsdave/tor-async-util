@@ -1,18 +1,22 @@
 import base64
 import ConfigParser
+import datetime
 import httplib
 import json
 import logging
 import os
 import re
+import random
 import signal
 import sys
+import uuid
 
 import jsonschema
 try:
     import pycurl
 except ImportError:
     pass
+from tornado.ioloop import IOLoop
 from keyczar import keyczar
 import tornado.web
 
@@ -742,10 +746,56 @@ def _health_check_gen_response_body(details):
 class AsyncAction(object):
     """Abstract base class for any async actions."""
 
-    def __init__(self, async_state):
+    def __init__(self, async_state=None):
         object.__init__(self)
 
+        self.id = uuid.uuid4().hex
+
         self.async_state = async_state
+
+    def create_log_msg_for_http_client_response(self, response, service):
+        """Create a message that the caller can write to a logger
+        containing timing details of the response to an async
+        ```tornado.httpclient.HTTPRequest```. The message should be
+        be easy to parse by performance analysis tools and used to understand
+        performance bottlenecks.
+
+        http://tornado.readthedocs.org/en/latest/httpclient.html#response-objects
+        explains that the time_info attribute of a tornado response
+        object contains timing details of the phases of a request which
+        is available when using the cURL http client. a description
+        of these timing details can be found at
+        http://curl.haxx.se/libcurl/c/curl_easy_getinfo.html#TIMES
+        and it is these detailed timings which are written to ```logger```
+        """
+        fmt = (
+            '{service} took {request_time:.2f} ms to respond '
+            'with {http_response_code:d} to {http_method} '
+            'against >>>{url}<<< - timing detail: '
+            'q={queue:.2f} ms n={namelookup:.2f} ms '
+            'c={connect:.2f} ms p={pretransfer:.2f} ms '
+            's={starttransfer:.2f} ms t={total:.2f} ms r={redirect:.2f} ms'
+        )
+        msg_format_args = {
+            'service': service,
+            'request_time': response.request_time * 1000,
+            'http_response_code': response.code,
+            'http_method': response.request.method,
+            'url': response.effective_url,
+        }
+
+        def add_time_info_to_msg_format_args(key):
+            msg_format_args[key] = response.time_info.get(key, 0) * 1000
+
+        add_time_info_to_msg_format_args('queue')
+        add_time_info_to_msg_format_args('namelookup')
+        add_time_info_to_msg_format_args('connect')
+        add_time_info_to_msg_format_args('pretransfer')
+        add_time_info_to_msg_format_args('starttransfer')
+        add_time_info_to_msg_format_args('total')
+        add_time_info_to_msg_format_args('redirect')
+
+        return fmt.format(**msg_format_args)
 
 
 class AsyncHealthCheck(AsyncAction):
@@ -764,52 +814,48 @@ class AsyncHealthCheck(AsyncAction):
         callback(None, self)
 
 
-def write_http_client_response_to_log(logger,
-                                      response,
-                                      service,
-                                      severity=logging.INFO):
-    """write a message to ```logger`` which can be easily parsed
-    by performance analysis tools and used to understand
-    performance bottlenecks.
+class ExponentialBackoffRetryStrategy(object):
+    """```ExponentialBackoffRetryStrategy``` implements a retry strategy
+    that, as the name suggests, waits exponentially longer time as the
+    number of retry attempts increases. The specific time waited is calculated
+    with the formula:
 
-    ```logger``` is expected to be an instance of ```logging.Logger``` typically
-    created by calling ```logging.getLogger()```
+        (2 ** retry_number) * 25 +/- random # between -10 & 10
 
-    http://tornado.readthedocs.org/en/latest/httpclient.html#response-objects
-    explains that the time_info attribute of a tornado response
-    object contains timing details of the phases of a request which
-    is available when using the cURL http client. a description
-    of these timing details can be found at
-    http://curl.haxx.se/libcurl/c/curl_easy_getinfo.html#TIMES
-    and it is these detailed timings which are written to ```logger```
+    To get a general sense of wait times:
+
+        for retry in range(1, 20): print (2**retry) * 100
+
+    References
+
+        * https://developers.google.com/google-apps/documents-list/?csw=1#implementing_exponential_backoff
+        * http://googleappsdeveloper.blogspot.ca/2011/12/documents-list-api-best-practices.html
+        * http://docs.aws.amazon.com/general/latest/gr/api-retries.html
     """
-    fmt = (
-        '\'{service}\' took {request_time:.2f} ms to respond '
-        'with {http_response_code:d} to \'{http_method}\' '
-        'against >>>{url}<<< - timing detail: '
-        'q={queue:.2f} ms n={namelookup:.2f} ms '
-        'c={connect:.2f} ms p={pretransfer:.2f} ms '
-        's={starttransfer:.2f} ms t={total:.2f} ms r={redirect:.2f} ms'
-    )
-    msg_format_args = {
-        'service': service,
-        'request_time': response.request_time * 1000,
-        'http_response_code': response.code,
-        'http_method': response.request.method,
-        'url': response.effective_url,
-    }
 
-    def add_time_info_to_msg_format_args(key):
-        msg_format_args[key] = response.time_info.get(key, 0) * 1000
+    def __init__(self, max_num_retries=20):
+        object.__init__(self)
 
-    add_time_info_to_msg_format_args('queue')
-    add_time_info_to_msg_format_args('namelookup')
-    add_time_info_to_msg_format_args('connect')
-    add_time_info_to_msg_format_args('pretransfer')
-    add_time_info_to_msg_format_args('starttransfer')
-    add_time_info_to_msg_format_args('total')
-    add_time_info_to_msg_format_args('redirect')
+        self.num_retries = 0
+        self.max_num_retries = max_num_retries
 
-    msg = fmt.format(**msg_format_args)
+    def next_attempt(self):
+        self.num_retries += 1
+        return self.num_retries < self.max_num_retries
 
-    logger.log(severity, msg)
+    def wait(self, callback, *callback_args, **callback_kwargs):
+
+        if not self.next_attempt():
+            callback(0, *callback_args, **callback_kwargs)
+            return
+
+        delay_in_ms = (2 ** self.num_retries) * 25 + random.randint(-10, 10)
+
+        IOLoop.current().add_timeout(
+            datetime.timedelta(0, delay_in_ms / 1000.0, 0),
+            callback,
+            delay_in_ms,
+            *callback_args,
+            **callback_kwargs)
+
+        return delay_in_ms

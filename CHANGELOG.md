@@ -8,14 +8,22 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - tornado 4.0.0 is a min pre-req
+- AsyncAction ctr now sets property id to a unique identifier for each
+AsyncAction instance - this will be useful for logging and debugging
+create_log_msg_for_http_client_response
+- AsyncAction.create_log_msg_for_http_client_response()
+replaces write_http_client_response_to_log()
+- added ExponentialBackoffRetryStrategy() utility class
 
 ### Changed
 
 - pep8 -> pycodestyle
+- async state
 
 ### Removed
 
-- ...
+- write_http_client_response_to_log() removed and replaced
+with AsyncAction.create_log_msg_for_http_client_response()
 
 ## [1.13.0] - [2016-01-29]
 ### Changed

@@ -1375,10 +1375,99 @@ class NoOpTestCase(RequestHandlerTestCase):
 
 class AsyncActionTestCase(unittest.TestCase):
 
-    def test_ctr(self):
+    def test_ctr_generates_id(self):
+        aa = tor_async_util.AsyncAction()
+        self.assertIsNotNone(aa.id)
+
+    def test_ctr_without_async_state(self):
+        aa = tor_async_util.AsyncAction()
+        self.assertIsNone(aa.async_state)
+
+    def test_ctr_with_async_state(self):
         async_state = mock.Mock()
         aa = tor_async_util.AsyncAction(async_state)
         self.assertTrue(aa.async_state is async_state)
+
+    def test_create_log_msg_for_http_client_response_with_time_info(self):
+        async_action = tor_async_util.AsyncAction()
+
+        response = mock.Mock(
+            code=httplib.OK,
+            error=None,
+            body=json.dumps({}),
+            time_info={
+                "queue": 1,
+                "namelookup": 2,
+                "connect": 3,
+                "pretransfer": 4,
+                "starttransfer": 5,
+                "total": 6,
+                "redirect": 7,
+            },
+            request_time=0.042,
+            effective_url="http://172.17.42.1:4001/v2/keys/key-value",
+            request=mock.Mock(method="GET"))
+
+        service = 'my service'
+
+        message = async_action.create_log_msg_for_http_client_response(
+            response,
+            service)
+
+        expected_message_fmt = (
+            "%s took %.2f ms to respond with "
+            "%d to %s against >>>%s<<< - "
+            "timing detail: "
+            "q=%.2f ms n=%.2f ms c=%.2f ms p=%.2f ms s=%.2f ms t=%.2f ms r=%.2f ms"
+        )
+        expected_message = expected_message_fmt % (
+            service,
+            response.request_time * 1000,
+            response.code,
+            response.request.method,
+            response.effective_url,
+            response.time_info["queue"] * 1000,
+            response.time_info["namelookup"] * 1000,
+            response.time_info["connect"] * 1000,
+            response.time_info["pretransfer"] * 1000,
+            response.time_info["starttransfer"] * 1000,
+            response.time_info["total"] * 1000,
+            response.time_info["redirect"] * 1000)
+
+        self.assertEqual(message, expected_message)
+
+    def test_with_no_time_info(self):
+        async_action = tor_async_util.AsyncAction()
+
+        response = mock.Mock(
+            code=httplib.OK,
+            error=None,
+            body=json.dumps({}),
+            time_info={},
+            request_time=0.042,
+            effective_url="http://172.17.42.1:4001/v2/keys/key-value",
+            request=mock.Mock(method="GET"))
+
+        service = 'my service'
+
+        message = async_action.create_log_msg_for_http_client_response(
+            response,
+            service)
+
+        expected_message_fmt = (
+            "%s took %.2f ms to respond with "
+            "%d to %s against >>>%s<<< - "
+            "timing detail: "
+            "q=0.00 ms n=0.00 ms c=0.00 ms p=0.00 ms s=0.00 ms t=0.00 ms r=0.00 ms"
+        )
+        expected_message = expected_message_fmt % (
+            service,
+            response.request_time * 1000,
+            response.code,
+            response.request.method,
+            response.effective_url)
+
+        self.assertEqual(message, expected_message)
 
 
 class HealthCheckRequestHandler(tor_async_util.RequestHandler):
@@ -1576,123 +1665,44 @@ class HealthCheckTestCase(RequestHandlerTestCase):
             self.assertDebugDetail(response, tor_async_util.HEALTH_CHECK_GDD_INVALID_RESPONSE_BODY)
 
 
-class WriteHttpClientResponseToLogTestCase(unittest.TestCase):
-    """A set of unit tests for ```write_http_client_response_to_log()```."""
+class ExponentialBackoffRetryStrategyTestCase(unittest.TestCase):
+    """A collection of unit tests for the ExponentialBackoffRetryStrategy class."""
 
-    def test_with_time_info(self):
-        logger = mock.Mock()
+    def test_ctr(self):
+        rs = tor_async_util.ExponentialBackoffRetryStrategy()
+        self.assertEqual(0, rs.num_retries)
+        self.assertTrue(0 < rs.max_num_retries)
 
-        response = mock.Mock(
-            code=httplib.OK,
-            error=None,
-            body=json.dumps({}),
-            time_info={
-                "queue": 1,
-                "namelookup": 2,
-                "connect": 3,
-                "pretransfer": 4,
-                "starttransfer": 5,
-                "total": 6,
-                "redirect": 7,
-            },
-            request_time=0.042,
-            effective_url="http://172.17.42.1:4001/v2/keys/key-value",
-            request=mock.Mock(method="GET"))
+        the_max_num_retries = 45
+        rs = tor_async_util.ExponentialBackoffRetryStrategy(the_max_num_retries)
+        self.assertEqual(0, rs.num_retries)
+        self.assertEqual(the_max_num_retries, rs.max_num_retries)
 
-        service = 'my service'
+    def test_next_attempt(self):
+        the_max_num_retries = 45
+        rs = tor_async_util.ExponentialBackoffRetryStrategy(the_max_num_retries)
+        self.assertEqual(0, rs.num_retries)
 
-        tor_async_util.write_http_client_response_to_log(
-            logger,
-            response,
-            service)
+        self.assertTrue(rs.next_attempt())
+        self.assertEqual(1, rs.num_retries)
+        self.assertTrue(0 < rs.max_num_retries)
 
-        expected_info_message_fmt = (
-            "'%s' took %.2f ms to respond with "
-            "%d to '%s' against >>>%s<<< - "
-            "timing detail: "
-            "q=%.2f ms n=%.2f ms c=%.2f ms p=%.2f ms s=%.2f ms t=%.2f ms r=%.2f ms"
-        )
-        expected_info_message = expected_info_message_fmt % (
-            service,
-            response.request_time * 1000,
-            response.code,
-            response.request.method,
-            response.effective_url,
-            response.time_info["queue"] * 1000,
-            response.time_info["namelookup"] * 1000,
-            response.time_info["connect"] * 1000,
-            response.time_info["pretransfer"] * 1000,
-            response.time_info["starttransfer"] * 1000,
-            response.time_info["total"] * 1000,
-            response.time_info["redirect"] * 1000)
+    def test_wait(self):
+        the_max_num_retries = 45
+        rs = tor_async_util.ExponentialBackoffRetryStrategy(the_max_num_retries)
+        while True:
+            add_timeout_patch = mock.Mock()
+            with mock.patch('tornado.ioloop.IOLoop.add_timeout', add_timeout_patch):
+                wait_callback = mock.Mock()
+                delay_in_ms = rs.wait(wait_callback)
+                if delay_in_ms:
+                    self.assertEqual(1, add_timeout_patch.call_count)
+                    self.assertEqual(0, wait_callback.call_count)
+                    self.assertTrue(0 < delay_in_ms)
+                else:
+                    self.assertEqual(0, add_timeout_patch.call_count)
+                    self.assertEqual(1, wait_callback.call_count)
+                    self.assertEqual(the_max_num_retries, rs.num_retries)
+                    return
 
-        logger.log.assert_called_once_with(logging.INFO, expected_info_message)
-
-    def test_with_no_time_info(self):
-        logger = mock.Mock()
-
-        response = mock.Mock(
-            code=httplib.OK,
-            error=None,
-            body=json.dumps({}),
-            time_info={},
-            request_time=0.042,
-            effective_url="http://172.17.42.1:4001/v2/keys/key-value",
-            request=mock.Mock(method="GET"))
-
-        service = 'my service'
-
-        tor_async_util.write_http_client_response_to_log(
-            logger,
-            response,
-            service)
-
-        expected_info_message_fmt = (
-            "'%s' took %.2f ms to respond with "
-            "%d to '%s' against >>>%s<<< - "
-            "timing detail: "
-            "q=0.00 ms n=0.00 ms c=0.00 ms p=0.00 ms s=0.00 ms t=0.00 ms r=0.00 ms"
-        )
-        expected_info_message = expected_info_message_fmt % (
-            service,
-            response.request_time * 1000,
-            response.code,
-            response.request.method,
-            response.effective_url)
-
-        logger.log.assert_called_once_with(logging.INFO, expected_info_message)
-
-    def test_with_error_log_severity(self):
-        logger = mock.Mock()
-
-        response = mock.Mock(
-            code=httplib.OK,
-            error=None,
-            body=json.dumps({}),
-            time_info={},
-            request_time=0.042,
-            effective_url="http://172.17.42.1:4001/v2/keys/key-value",
-            request=mock.Mock(method="GET"))
-
-        service = 'my service'
-
-        tor_async_util.write_http_client_response_to_log(
-            logger,
-            response,
-            service,
-            logging.ERROR)
-
-        expected_info_message_fmt = (
-            "'%s' took %.2f ms to respond with "
-            "%d to '%s' against >>>%s<<< - "
-            "timing detail: "
-            "q=0.00 ms n=0.00 ms c=0.00 ms p=0.00 ms s=0.00 ms t=0.00 ms r=0.00 ms"
-        )
-        expected_info_message = expected_info_message_fmt % (
-            service,
-            response.request_time * 1000,
-            response.code,
-            response.request.method,
-            response.effective_url)
-
-        logger.log.assert_called_once_with(logging.ERROR, expected_info_message)
+        self.assertTure(False)
