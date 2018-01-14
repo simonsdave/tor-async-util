@@ -23,7 +23,7 @@ import tornado.web
 import jsonschemas
 
 
-__version__ = '1.13.1'
+__version__ = '1.14.0'
 
 
 _logger = logging.getLogger('tor_async_util')
