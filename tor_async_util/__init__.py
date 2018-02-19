@@ -23,7 +23,7 @@ import tornado.web
 import jsonschemas
 
 
-__version__ = '1.14.0'
+__version__ = '1.13.1'
 
 
 _logger = logging.getLogger('tor_async_util')
@@ -655,20 +655,24 @@ def generate_health_check_response(request_handler, async_health_check_class):
 
     A minimal AsyncHealthCheck implementation
 
-        class AsyncHealthCheck(object):
+        class AsyncHealthCheck(tor_async_util.AsyncAction):
 
             def __init__(self, is_quick, async_state=None):
-                object.__init__(self)
+                tor_async_util.AsyncAction.__init__(self, async_state)
 
                 self.is_quick = is_quick
-                self.async_state = async_state
 
             def check(self, callback):
                 if self.is_quick:
                     details = None
                 else:
+                    aspects = [
+                        tor_async_util.AspectHealth('configured', True),
+                        tor_async_util.AspectHealth('working', False),
+                    ]
                     details = {
-                        'other_service': True,
+                        tor_async_util.ComponentHealth('component 1', is_ok=True),
+                        tor_async_util.ComponentHealth('component 2', aspects=aspects),
                     }
 
                 callback(details, self)
@@ -719,6 +723,55 @@ def _health_check_on_ahc_check_done(details, ahc):
     request_handler.finish()
 
 
+class AspectHealth(object):
+    """See ```ComponentHealth``` and ```generate_health_check_response()```
+    for details.
+    """
+
+    def __init__(self, name, is_ok):
+        object.__init__(self)
+
+        self.name = name
+        self.is_ok = is_ok
+
+    @property
+    def health_color(self):
+        return _health_check_color(self.is_ok)
+
+
+class ComponentHealth(object):
+    """Health of a service is determined by the health of each component
+    within a service. An instance of ```ComponentHealth``` represents the
+    health of a service's component. A component's health can either be
+    determined by a simple boolean (True = healthy, False=unhealthy) or
+    the aggregation of a number of aspects of the component. A component
+    aspect is represented by an instance of ```AspectHealth``` which has
+    a simple boolean representation of health. If any aspect of a component
+    is unhealthy the component is unhealthy. For more details see the docs
+    for ```generate_health_check_response()```.
+    """
+
+    def __init__(self, name, aspects=None, is_ok=None):
+        object.__init__(self)
+
+        assert aspects is None or is_ok is None
+
+        self.name = name
+        self.aspects = aspects
+        self.is_ok = is_ok
+
+    @property
+    def health_color(self):
+        if self.is_ok is not None:
+            return _health_check_color(self.is_ok)
+
+        for aspect in self.aspects:
+            if not aspect.is_ok:
+                return _health_check_color(False)
+
+        return _health_check_color(True)
+
+
 def _health_check_gen_response_body(details):
     """A private function only used by ```_health_check_on_ahc_check_done()```
     to recursively generate. The "status" portion of the health endpoint's
@@ -728,18 +781,28 @@ def _health_check_gen_response_body(details):
     rv = {
         'status': _health_check_color(True),
     }
-    if details:
-        rv['details'] = {}
-        for (component, value) in details.iteritems():
-            if isinstance(value, dict):
-                rv['details'][component] = _health_check_gen_response_body(value)
-                if rv['details'][component]['status'] == _health_check_color(False):
-                    rv['status'] = _health_check_color(False)
-            else:
-                assert isinstance(value, bool)
-                rv['details'][component] = _health_check_color(value)
-                if not value:
-                    rv['status'] = _health_check_color(False)
+    if not details:
+        return rv
+
+    rv['details'] = {}
+
+    for component in details:
+        if component.health_color == _health_check_color(False):
+            rv['status'] = _health_check_color(False)
+
+        if not component.aspects:
+            rv['details'][component.name] = component.health_color
+            continue
+
+        rv['details'][component.name] = {
+            'status': component.health_color,
+            'details': {
+            }
+        }
+
+        for aspect in component.aspects:
+            rv['details'][component.name]['details'][aspect.name] = aspect.health_color
+
     return rv
 
 

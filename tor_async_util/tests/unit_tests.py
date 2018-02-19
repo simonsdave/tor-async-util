@@ -1492,14 +1492,13 @@ class HealthCheckTestCase(RequestHandlerTestCase):
         return tornado.web.Application(handlers=handlers)
 
     def test_happy_path_with_details_all_ok(self):
-        the_details = {
-            'dave': True,
-            'here': True,
-            'and': True,
-        }
-
         def check_patch(ahc, callback):
-            callback(the_details, ahc)
+            details = {
+                tor_async_util.ComponentHealth('dave', is_ok=True),
+                tor_async_util.ComponentHealth('here', is_ok=True),
+                tor_async_util.ComponentHealth('and', is_ok=True),
+            }
+            callback(details, ahc)
 
         with mock.patch(__name__ + '.tor_async_util.AsyncHealthCheck.check', check_patch):
             response = self.fetch(HealthCheckRequestHandler.url_spec, method='GET')
@@ -1521,18 +1520,19 @@ class HealthCheckTestCase(RequestHandlerTestCase):
             self.assertEqual(json.loads(response.body), expected_response_body)
 
     def test_happy_path_with_multi_level_details_all_ok(self):
-        the_details = {
-            'component1': True,
-            'component2': {
-                'subcomponent1': True,
-                'subcomponent2': True,
-                'subcomponent3': True,
-            },
-            'component3': True,
-        }
-
         def check_patch(ahc, callback):
-            callback(the_details, ahc)
+            component2_aspects = [
+                tor_async_util.AspectHealth('subcomponent1', True),
+                tor_async_util.AspectHealth('subcomponent2', True),
+                tor_async_util.AspectHealth('subcomponent3', True),
+            ]
+            details = {
+                tor_async_util.ComponentHealth('component1', is_ok=True),
+                tor_async_util.ComponentHealth('component2', aspects=component2_aspects),
+                tor_async_util.ComponentHealth('component3', is_ok=True),
+            }
+
+            callback(details, ahc)
 
         with mock.patch(__name__ + '.tor_async_util.AsyncHealthCheck.check', check_patch):
             response = self.fetch(HealthCheckRequestHandler.url_spec, method='GET')
@@ -1561,14 +1561,14 @@ class HealthCheckTestCase(RequestHandlerTestCase):
             self.assertEqual(json.loads(response.body), expected_response_body)
 
     def test_happy_path_with_details_one_component_in_error(self):
-        the_details = {
-            'dave': True,
-            'here': False,
-            'and': True,
-        }
-
         def check_patch(ahc, callback):
-            callback(the_details, ahc)
+            details = {
+                tor_async_util.ComponentHealth('dave', is_ok=True),
+                tor_async_util.ComponentHealth('here', is_ok=False),
+                tor_async_util.ComponentHealth('and', is_ok=True),
+            }
+
+            callback(details, ahc)
 
         with mock.patch(__name__ + '.tor_async_util.AsyncHealthCheck.check', check_patch):
             response = self.fetch(HealthCheckRequestHandler.url_spec, method='GET')
@@ -1590,18 +1590,19 @@ class HealthCheckTestCase(RequestHandlerTestCase):
             self.assertEqual(json.loads(response.body), expected_response_body)
 
     def test_happy_path_with_multi_level_details_with_error_leaf_components(self):
-        the_details = {
-            'component1': True,
-            'component2': {
-                'subcomponent1': True,
-                'subcomponent2': False,
-                'subcomponent3': True,
-            },
-            'component3': True,
-        }
-
         def check_patch(ahc, callback):
-            callback(the_details, ahc)
+            component2_aspects = [
+                tor_async_util.AspectHealth('subcomponent1', True),
+                tor_async_util.AspectHealth('subcomponent2', False),
+                tor_async_util.AspectHealth('subcomponent3', True),
+            ]
+            details = {
+                tor_async_util.ComponentHealth('component1', is_ok=True),
+                tor_async_util.ComponentHealth('component2', aspects=component2_aspects),
+                tor_async_util.ComponentHealth('component3', is_ok=True),
+            }
+
+            callback(details, ahc)
 
         with mock.patch(__name__ + '.tor_async_util.AsyncHealthCheck.check', check_patch):
             response = self.fetch(HealthCheckRequestHandler.url_spec, method='GET')
@@ -1631,7 +1632,10 @@ class HealthCheckTestCase(RequestHandlerTestCase):
 
     def test_happy_path_with_service_unavailable(self):
         def check_patch(ahc, callback):
-            callback({'some component': False}, ahc)
+            details = {
+                tor_async_util.ComponentHealth('some component', is_ok=False),
+            }
+            callback(details, ahc)
 
         with mock.patch(__name__ + '.tor_async_util.AsyncHealthCheck.check', check_patch):
             response = self.fetch(HealthCheckRequestHandler.url_spec, method='GET')
