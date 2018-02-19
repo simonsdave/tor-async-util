@@ -4,7 +4,7 @@
 #   >git clone https://github.com/simonsdave/tor-async-util.git
 #   >cd tor-async-util
 #   >source cfg4dev
-#   >python setup.py sdist --formats=gztar
+#   >python setup.py bdist_wheel sdist --formats=gztar
 #
 # update pypitest with both meta data and source distribution (FYI ...
 # use of pandoc is as per https://github.com/pypa/pypi-legacy/issues/148#issuecomment-226939424
