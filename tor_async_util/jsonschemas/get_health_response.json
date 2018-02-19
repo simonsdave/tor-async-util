@@ -3,7 +3,7 @@
     "title": "get health response",
     "description": "get health response",
     "definitions": {
-        "status": {
+        "status_as_color": {
             "type": "string",
             "enum": [
                 "red",
@@ -14,7 +14,7 @@
     "type": "object",
     "properties": {
         "status": {
-            "$ref": "#definitions/status"
+            "$ref": "#definitions/status_as_color"
         },
         "details": {
             "oneOf": [
@@ -22,7 +22,7 @@
                     "type": "object",
                     "patternProperties": {
                         "^[a-zA-Z_]+$": {
-                            "$ref": "#definitions/status"
+                            "$ref": "#definitions/status_as_color"
                         }
                     }
                 },
@@ -30,12 +30,12 @@
                     "type": "object",
                     "properties": {
                         "status": {
-                            "$ref": "#definitions/status"
+                            "$ref": "#definitions/status_as_color"
                         },
                         "details": {
                             "patternProperties": {
                                 "^[a-zA-Z_]+$": {
-                                    "$ref": "#definitions/status"
+                                    "$ref": "#definitions/status_as_color"
                                 }
                             }
                         }
