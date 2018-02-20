@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - ndg-httpsclient 0.4.3 -> 0.4.4
+- refactored support for implementing ```/_health``` endpoint
 
 ### Removed
 
