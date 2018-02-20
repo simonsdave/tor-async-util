@@ -261,7 +261,7 @@ to confirm all is ok and if it is upload to the production version of pypi.
 page hit the <Draft a new release> button in the upper right corner
 * fill out the release form as per the screenshot below
 * main body of the form can be pulled directly from [CHANGELOG.md](../CHANGELOG.md)
-* don't forget to attach to the release the ```tor-async-util-*.whl``` and ```tor-async-util-*.tar.gz```
+* don't forget to attach to the release the ```tor_async_util-*.whl``` and ```tor_async_util-*.tar.gz```
 copied to ```/vagrant``` in one of the above steps
 
 ![](release-form.png)
