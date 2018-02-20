@@ -4,9 +4,9 @@
 ![PythonVersions](https://img.shields.io/pypi/pyversions/tor-async-util.svg?style=flat)
 ![status](https://img.shields.io/pypi/status/tor-async-util.svg?style=flat)
 [![PyPI](https://img.shields.io/pypi/v/tor-async-util.svg?style=flat)](https://pypi.python.org/pypi/tor-async-util)
-[![Requirements Status](https://requires.io/github/simonsdave/tor-async-util/requirements.svg?branch=master)](https://requires.io/github/simonsdave/tor-async-util/requirements/?branch=master)
-[![Build Status](https://travis-ci.org/simonsdave/tor-async-util.svg?branch=master)](https://travis-ci.org/simonsdave/tor-async-util)
-[![Coverage Status](https://coveralls.io/repos/simonsdave/tor-async-util/badge.svg?branch=master&service=github)](https://coveralls.io/github/simonsdave/tor-async-util?branch=master)
+[![Requirements Status](https://requires.io/github/simonsdave/tor-async-util/requirements.svg?branch=release-1.14.0)](https://requires.io/github/simonsdave/tor-async-util/requirements/?branch=release-1.14.0)
+[![Build Status](https://travis-ci.org/simonsdave/tor-async-util.svg?branch=release-1.14.0)](https://travis-ci.org/simonsdave/tor-async-util)
+[![Coverage Status](https://coveralls.io/repos/simonsdave/tor-async-util/badge.svg?branch=release-1.14.0&service=github)](https://coveralls.io/github/simonsdave/tor-async-util?branch=release-1.14.0)
 
 tor-async-util is a set of utilities that are useful
 when implementing RESTful APIs using [Tornado's](http://www.tornadoweb.org/en/stable/)
