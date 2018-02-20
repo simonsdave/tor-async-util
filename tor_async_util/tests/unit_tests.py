@@ -1470,6 +1470,76 @@ class AsyncActionTestCase(unittest.TestCase):
         self.assertEqual(message, expected_message)
 
 
+class AspectHealthTestCase(unittest.TestCase):
+
+    def test_ctr(self):
+        name = uuid.uuid4().hex
+        is_ok = uuid.uuid4().hex
+
+        aspect = tor_async_util.AspectHealth(name, is_ok)
+
+        self.assertEqual(aspect.name, name)
+        self.assertEqual(aspect.is_ok, is_ok)
+
+    def test_health_color(self):
+        aspect = tor_async_util.AspectHealth(uuid.uuid4().hex, True)
+        self.assertEqual(aspect.health_color, 'green')
+
+        aspect = tor_async_util.AspectHealth(uuid.uuid4().hex, False)
+        self.assertEqual(aspect.health_color, 'red')
+
+
+class ComponentHealthTestCase(unittest.TestCase):
+
+    def test_ctr_aspects_not_none(self):
+        name = uuid.uuid4().hex
+        aspects = uuid.uuid4().hex
+        is_ok = None
+
+        component = tor_async_util.ComponentHealth(name, aspects=aspects, is_ok=is_ok)
+
+        self.assertEqual(component.name, name)
+        self.assertEqual(component.is_ok, is_ok)
+        self.assertEqual(component.aspects, aspects)
+
+    def test_ctr_is_ok_not_none(self):
+        name = uuid.uuid4().hex
+        aspects = None
+        is_ok = uuid.uuid4().hex
+
+        component = tor_async_util.ComponentHealth(name, aspects=aspects, is_ok=is_ok)
+
+        self.assertEqual(component.name, name)
+        self.assertEqual(component.is_ok, is_ok)
+        self.assertEqual(component.aspects, aspects)
+
+    def test_health_color_from_is_ok_true(self):
+        component = tor_async_util.ComponentHealth(uuid.uuid4().hex, is_ok=True)
+        self.assertEqual(component.health_color, 'green')
+
+    def test_health_color_from_is_ok_false(self):
+        component = tor_async_util.ComponentHealth(uuid.uuid4().hex, is_ok=False)
+        self.assertEqual(component.health_color, 'red')
+
+    def test_health_color_from_aspects_all_ok(self):
+        aspects = [
+            tor_async_util.AspectHealth(uuid.uuid4().hex, True),
+            tor_async_util.AspectHealth(uuid.uuid4().hex, True),
+            tor_async_util.AspectHealth(uuid.uuid4().hex, True),
+        ]
+        component = tor_async_util.ComponentHealth(uuid.uuid4().hex, aspects=aspects)
+        self.assertEqual(component.health_color, 'green')
+
+    def test_health_color_from_aspects_one_bad(self):
+        aspects = [
+            tor_async_util.AspectHealth(uuid.uuid4().hex, True),
+            tor_async_util.AspectHealth(uuid.uuid4().hex, False),
+            tor_async_util.AspectHealth(uuid.uuid4().hex, True),
+        ]
+        component = tor_async_util.ComponentHealth(uuid.uuid4().hex, aspects=aspects)
+        self.assertEqual(component.health_color, 'red')
+
+
 class HealthCheckRequestHandler(tor_async_util.RequestHandler):
 
     url_spec = r'/_health'
