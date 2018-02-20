@@ -43,8 +43,8 @@ when implementing RESTful APIs using [Tornado's](http://www.tornadoweb.org/en/st
   for things settings such as logging levels, keyczar crypters and keyczar
   signers - see ```Config```
 
-- core implementations of ```/_noop``` and ```/_health``` endpoints
-  include async health checkers - see ```generate_noop_response()```,
+- core implementations of ```/_version```, ```/_noop``` and ```/_health``` endpoints
+  include async health checkers - see ```generate_version_response()```, ```generate_noop_response()```,
   ```generate_health_check_response()``` and ```AsyncHealthCheck```
 
 - [this](http://tornado.readthedocs.org/en/latest/httpclient.html#response-objects)
