@@ -7,7 +7,9 @@ install:
 script:
   - pycodestyle
   - flake8
+  - travis_fold start "build.python.packages"
   - python setup.py bdist_wheel sdist --formats=gztar
+  - travis_fold end "build.python.packages"
   - nosetests --with-coverage --cover-branches --cover-erase --cover-package tor_async_util
 after_success:
   - coveralls || true
