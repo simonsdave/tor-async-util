@@ -11,7 +11,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- Nothing
+- twine 1.10.0 -> 1.11.0
 
 ### Removed
 
