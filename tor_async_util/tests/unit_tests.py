@@ -193,7 +193,7 @@ class DefaultHandlerTestCase(tornado.testing.AsyncHTTPTestCase):
             content_type = response.headers.get("Content-Type", None)
             self.assertIsNotNone(content_type)
             json_utf8_content_type_reg_ex = re.compile(
-                "^\s*application/json;\s+charset\=utf-{0,1}8\s*$",
+                r"^\s*application/json;\s+charset\=utf-{0,1}8\s*$",
                 re.IGNORECASE)
             self.assertTrue(json_utf8_content_type_reg_ex.match(content_type))
 
@@ -247,7 +247,7 @@ class RequestHandlerTestCase(tornado.testing.AsyncHTTPTestCase):
     """Abstract base class for all handler unit test cases."""
 
     _json_utf8_content_type_reg_ex = re.compile(
-        "^\s*application/json;\s+charset\=utf-{0,1}8\s*$",
+        r"^\s*application/json;\s+charset\=utf-{0,1}8\s*$",
         re.IGNORECASE)
 
     def fetch(self, path, **kwargs):

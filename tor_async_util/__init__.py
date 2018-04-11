@@ -197,7 +197,7 @@ class RequestHandler(tornado.web.RequestHandler):
     """An abstract base class for request handlers."""
 
     _json_utf8_content_type_reg_ex = re.compile(
-        "^\s*application/json(;\s+charset\=utf-{0,1}8){0,1}\s*$",
+        r"^\s*application/json(;\s+charset\=utf-{0,1}8){0,1}\s*$",
         re.IGNORECASE)
 
     def add_debug_details(self, value):
@@ -302,7 +302,7 @@ class RequestHandler(tornado.web.RequestHandler):
         if auth_hdr_val is None:
             return (None, None, self.GBAC_NO_AUTHORIZATION_HEADER)
 
-        pattern = "^\s*BASIC\s+(?P<auth_hdr_val>[^\s]+)\s*$"
+        pattern = r"^\s*BASIC\s+(?P<auth_hdr_val>[^\s]+)\s*$"
         reg_ex = re.compile(pattern, re.IGNORECASE)
         match = reg_ex.match(auth_hdr_val)
         if not match:
@@ -315,7 +315,7 @@ class RequestHandler(tornado.web.RequestHandler):
         except Exception:
             return (None, None, self.GBAC_BAD_B64_ENCODING)
 
-        pattern = "^\s*(?P<username>[^:]+):(?P<password>[^\s]+)\s*$"
+        pattern = r"^\s*(?P<username>[^:]+):(?P<password>[^\s]+)\s*$"
         reg_ex = re.compile(pattern, re.IGNORECASE)
         match = reg_ex.match(auth_hdr_val)
         if not match:
@@ -401,22 +401,22 @@ class Config(object):
 
     """Used to determine if a string represents an integer value."""
     _int_reg_ex = re.compile(
-        "^\-{0,1}\d+$",
+        r"^\-{0,1}\d+$",
         re.IGNORECASE)
 
     """Used to determine if a string represents a "true" boolean value."""
     _true_reg_ex = re.compile(
-        "^(true|t|y|yes|1)$",
+        r"^(true|t|y|yes|1)$",
         re.IGNORECASE)
 
     """Used to determine if a string represents a "false" boolean value."""
     _false_reg_ex = re.compile(
-        "^(false|f|n|no|0)$",
+        r"^(false|f|n|no|0)$",
         re.IGNORECASE)
 
     """Used to turn a logging level string into a logging level."""
     _logging_level_reg_ex = re.compile(
-        "^(DEBUG|INFO|WARNING|ERROR|CRITICAL|FATAL)$",
+        r"^(DEBUG|INFO|WARNING|ERROR|CRITICAL|FATAL)$",
         re.IGNORECASE)
 
     def __init__(self, config_file):
