@@ -5,10 +5,7 @@ install:
   - source cfg4dev
   - pip install coveralls
 script:
-  # pycodestyle 2.4.0 & flake8 3.5.0 aren't compatible - until
-  # that's fixed running pycodestyle directly
-  - pycodestyle
-  # - flake8
+  - flake8
   - travis_fold start "build.python.packages"
   - python setup.py bdist_wheel sdist --formats=gztar
   - travis_fold end "build.python.packages"
