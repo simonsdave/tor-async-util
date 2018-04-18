@@ -6,6 +6,7 @@ install:
   - pip install coveralls
 script:
   - flake8
+  - pip check
   - travis_fold start "build.python.packages"
   - python setup.py bdist_wheel sdist --formats=gztar
   - travis_fold end "build.python.packages"
