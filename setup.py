@@ -92,7 +92,7 @@ setup(
     install_requires=[
         "jsonschema>=2.5.0",
         "python-keyczar==0.716",
-        "tornado>=4.0.0",
+        "tornado<5.0.0",
     ],
     include_package_data=True,
     version=version,
