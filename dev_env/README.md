@@ -3,7 +3,7 @@
 To increase predicability, it is recommended
 that ```tor-async-util``` development be done on a [Vagrant](http://www.vagrantup.com/) provisioned
 [VirtualBox](https://www.virtualbox.org/)
-VM running [Ubuntu 14.04](http://releases.ubuntu.com/14.04/).
+VM running [Ubuntu 16.04](http://releases.ubuntu.com/16.04/).
 Below are the instructions for spinning up such a VM.
 
 Spin up a VM using [create_dev_env.sh](create_dev_env.sh)
@@ -15,7 +15,7 @@ the VM you will use ```vagrant ssh```, ```vagrant halt```,
 ```bash
 > ./create_dev_env.sh simonsdave simonsdave@gmail.com ~/.ssh/id_rsa.pub ~/.ssh/id_rsa
 Bringing machine 'default' up with 'virtualbox' provider...
-==> default: Importing base box 'trusty'...
+==> default: Importing base box 'ubuntu/xenial64'...
 .
 .
 .
@@ -25,18 +25,18 @@ Bringing machine 'default' up with 'virtualbox' provider...
 SSH into the VM.
 
 ```bash
-> vagrant ssh
-Welcome to Ubuntu 14.04 LTS (GNU/Linux 3.13.0-27-generic x86_64)
+>vagrant ssh
+Welcome to Ubuntu 16.04.4 LTS (GNU/Linux 4.4.0-119-generic x86_64)
 
- * Documentation:  https://help.ubuntu.com/
-
- System information disabled due to load higher than 1.0
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
 
   Get cloud support with Ubuntu Advantage Cloud Guest:
     http://www.ubuntu.com/business/services/cloud
 
-0 packages can be updated.
-0 updates are security updates.
+7 packages can be updated.
+7 updates are security updates.
 
 
 ~>
