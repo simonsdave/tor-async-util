@@ -6,8 +6,8 @@ install:
   - source cfg4dev
   - pip install coveralls
 script:
-  - flake8
   - pip check
+  - flake8
   - travis_fold start "build.python.packages"
   - python setup.py bdist_wheel sdist --formats=gztar
   - travis_fold end "build.python.packages"
