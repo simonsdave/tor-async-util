@@ -20,3 +20,5 @@ COPY bin/tor_async_util_nosetests.py /tmp/bin/tor_async_util_nosetests.py
 RUN cd /tmp && pip install --requirement "/tmp/requirements.txt"
 
 ENV DEBIAN_FRONTEND newt
+
+WORKDIR /app
