@@ -8,7 +8,7 @@ RUN apt-get install -y build-essential
 RUN apt-get install -y libffi-dev
 RUN apt-get install -y python-crypto
 RUN apt-get install -y libcurl4-openssl-dev
-RUN apt-get install -y python-pycurl
+RUN apt-get install -y libssl-dev
 
 COPY requirements.txt /tmp/requirements.txt
 COPY setup.py /tmp/setup.py
