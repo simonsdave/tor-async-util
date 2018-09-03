@@ -7,7 +7,6 @@ import os
 import re
 import shutil
 import signal
-import sys
 import tempfile
 import unittest
 import uuid
