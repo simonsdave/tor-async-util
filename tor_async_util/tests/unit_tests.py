@@ -22,58 +22,80 @@ import tornado.web
 import tor_async_util
 
 
-class MockPycurlInstaller(object):
+class Patcher(object):
+    """An abstract base class for all patcher context managers."""
 
-    def __init__(self, ut, version_info_return_value):
+    def __init__(self, patcher):
         object.__init__(self)
-
-        pycurl_mock = mock.Mock()
-        pycurl_mock.version_info.return_value = version_info_return_value
-        self._pycurl_patch = mock.patch(
-            __name__ + ".tor_async_util.pycurl",
-            pycurl_mock,
-            create=True)    # :TRICKY: 'create' important since pycurl doesn't exist
+        self._patcher = patcher
 
     def __enter__(self):
-        self._pycurl_patch.start()
+        self._patcher.start()
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self._pycurl_patch.stop()
+        self._patcher.stop()
+
+
+class PyCurlVersionInfoExceptionPatcher(Patcher):
+
+    def __init__(self):
+
+        self.id = uuid.uuid4().hex
+
+        def patch():
+            raise Exception(self.id)
+
+        patcher = mock.patch(
+            __name__ + '.tor_async_util.pycurl.version_info',
+            patch)
+
+        Patcher.__init__(self, patcher)
+
+
+class PyCurlVersionInfoPatcher(Patcher):
+
+    def __init__(self, value):
+
+        def patch():
+            return value
+
+        patcher = mock.patch(
+            __name__ + '.tor_async_util.pycurl.version_info',
+            patch)
+
+        Patcher.__init__(self, patcher)
 
 
 class IsLibCurlCompiledWithAsyncDNSResolverTestCase(unittest.TestCase):
     """Unit tests for is_libcurl_compiled_with_async_dns_resolver()."""
 
-    def setUp(self):
-        self.assertTrue("pycurl" not in sys.modules)
-        with self.assertRaises(ImportError):
-            import pycurl
-            pycurl.never_get_here_but_fixes_flake8_error()
-
     def test_pycurl_import_not_available(self):
-        with mock.patch(__name__ + ".tor_async_util._logger") as logger_patch:
-            self.assertFalse(tor_async_util.is_libcurl_compiled_with_async_dns_resolver())
+        with PyCurlVersionInfoExceptionPatcher() as version_info_patcher:
+            with mock.patch(__name__ + '.tor_async_util._logger') as logger_patch:
+                self.assertFalse(tor_async_util.is_libcurl_compiled_with_async_dns_resolver())
 
-            self.assertEqual(
-                logger_patch.error.call_args_list,
-                [])
+                self.assertEqual(
+                    logger_patch.error.call_args_list,
+                    [])
 
-            self.assertEqual(
-                logger_patch.info.call_args_list,
-                [])
+                self.assertEqual(
+                    logger_patch.info.call_args_list,
+                    [])
 
-            expected_debug_message = (
-                "Error trying to figure out if libcurl is complied with "
-                "async DNS resolver - global name 'pycurl' is not defined"
-            )
-            self.assertEqual(
-                logger_patch.debug.call_args_list,
-                [mock.call(expected_debug_message)])
+                expected_debug_message_fmt = (
+                    'Error trying to figure out if libcurl is complied with '
+                    'async DNS resolver - %s'
+                )
+                expected_debug_message = expected_debug_message_fmt % version_info_patcher.id
+
+                self.assertEqual(
+                    logger_patch.debug.call_args_list,
+                    [mock.call(expected_debug_message)])
 
     def test_happy_version_info_array_does_not_contain_features(self):
-        with MockPycurlInstaller(self, []):
-            with mock.patch(__name__ + ".tor_async_util._logger") as logger_patch:
+        with PyCurlVersionInfoPatcher([]):
+            with mock.patch(__name__ + '.tor_async_util._logger') as logger_patch:
                 self.assertFalse(tor_async_util.is_libcurl_compiled_with_async_dns_resolver())
 
                 self.assertEqual(
@@ -93,8 +115,8 @@ class IsLibCurlCompiledWithAsyncDNSResolverTestCase(unittest.TestCase):
                     [mock.call(expected_debug_message)])
 
     def test_happy_path(self):
-        with MockPycurlInstaller(self, [0, 0, 0, 0, 1 << 7]):
-            with mock.patch(__name__ + ".tor_async_util._logger") as logger_patch:
+        with PyCurlVersionInfoPatcher([0, 0, 0, 0, 1 << 7]):
+            with mock.patch(__name__ + '.tor_async_util._logger') as logger_patch:
                 self.assertTrue(tor_async_util.is_libcurl_compiled_with_async_dns_resolver())
 
                 self.assertEqual(
@@ -207,20 +229,6 @@ class DefaultHandlerTestCase(tornado.testing.AsyncHTTPTestCase):
         self._test("PUT")
         self._test("OPTIONS")
         self._test("HEAD")
-
-
-class Patcher(object):
-
-    def __init__(self, patcher):
-        object.__init__(self)
-        self._patcher = patcher
-
-    def __enter__(self):
-        self._patcher.start()
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self._patcher.stop()
 
 
 class WriteAndVerifyPatcher(Patcher):

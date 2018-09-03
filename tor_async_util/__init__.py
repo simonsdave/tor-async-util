@@ -11,17 +11,13 @@ import signal
 import sys
 import uuid
 
-import jsonschema
-try:
-    import pycurl
-except ImportError:
-    pass
 from tornado.ioloop import IOLoop
+import jsonschema
 from keyczar import keyczar
+import pycurl
 import tornado.web
 
 import jsonschemas
-
 
 __version__ = '1.15.0'
 
