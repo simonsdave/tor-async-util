@@ -13,7 +13,7 @@ if [ $# != 0 ]; then
 fi
 
 CONTEXT_DIR=$(mktemp -d 2> /dev/null || mktemp -d -t DAS)
-PROJECT_HOME_DIR="$SCRIPT_DIR_NAME/../.."
+PROJECT_HOME_DIR="$SCRIPT_DIR_NAME/.."
 cp "$PROJECT_HOME_DIR/requirements.txt" "$CONTEXT_DIR/."
 cp "$PROJECT_HOME_DIR/setup.py" "$CONTEXT_DIR/."
 mkdir "$CONTEXT_DIR/tor_async_util"
