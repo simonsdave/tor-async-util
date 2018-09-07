@@ -6,6 +6,8 @@ if [ -f "$PWD/requirements.txt" ]; then
         source "$PWD/env/bin/activate"
 
         pip install --requirement "$PWD/requirements.txt"
+
+        "$PWD/dev_env/build-docker-image.sh"
     fi
 
     export PATH=$PATH:"$PWD/bin"
