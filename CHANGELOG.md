@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - twine 1.10.0 -> 1.11.0
+- tornado <5.0.0 -> >=4.0.0
 
 ### Removed
 
