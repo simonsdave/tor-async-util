@@ -14,8 +14,6 @@ COPY requirements.txt /tmp/requirements.txt
 COPY setup.py /tmp/setup.py
 RUN mkdir /tmp/tor_async_util
 COPY tor_async_util/__init__.py /tmp/tor_async_util/__init__.py
-RUN mkdir /tmp/bin
-COPY bin/tor_async_util_nosetests.py /tmp/bin/tor_async_util_nosetests.py
 
 RUN cd /tmp && pip install --requirement "/tmp/requirements.txt"
 

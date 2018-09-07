@@ -18,8 +18,6 @@ cp "$PROJECT_HOME_DIR/requirements.txt" "$CONTEXT_DIR/."
 cp "$PROJECT_HOME_DIR/setup.py" "$CONTEXT_DIR/."
 mkdir "$CONTEXT_DIR/tor_async_util"
 cp "$PROJECT_HOME_DIR/tor_async_util/__init__.py" "$CONTEXT_DIR/tor_async_util/."
-mkdir "$CONTEXT_DIR/bin"
-cp "$PROJECT_HOME_DIR/bin/tor_async_util_nosetests.py" "$CONTEXT_DIR/bin/."
 
 TAG=latest
 IMAGE_NAME="simonsdave/tor-async-util-dev-env:$TAG"

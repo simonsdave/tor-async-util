@@ -86,9 +86,6 @@ setup(
     packages=[
         "tor_async_util",
     ],
-    scripts=[
-        "bin/tor_async_util_nosetests.py",
-    ],
     install_requires=[
         "jsonschema>=2.5.0",
         "python-keyczar==0.716",

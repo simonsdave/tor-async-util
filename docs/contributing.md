@@ -123,7 +123,6 @@ creating build/bdist.linux-x86_64/wheel/tor_async_util/jsonschemas
 copying build/lib.linux-x86_64-2.7/tor_async_util/jsonschemas/get_health_response.json -> build/bdist.linux-x86_64/wheel/tor_async_util/jsonschemas
 copying build/lib.linux-x86_64-2.7/tor_async_util/jsonschemas/get_noop_response.json -> build/bdist.linux-x86_64/wheel/tor_async_util/jsonschemas
 copying build/lib.linux-x86_64-2.7/tor_async_util/jsonschemas/get_version_response.json -> build/bdist.linux-x86_64/wheel/tor_async_util/jsonschemas
-copying build/lib.linux-x86_64-2.7/tor_async_util/nose_plugins.py -> build/bdist.linux-x86_64/wheel/tor_async_util
 copying build/lib.linux-x86_64-2.7/tor_async_util/__init__.py -> build/bdist.linux-x86_64/wheel/tor_async_util
 copying build/lib.linux-x86_64-2.7/tor_async_util/jsonschemas.py -> build/bdist.linux-x86_64/wheel/tor_async_util
 running install_egg_info
@@ -137,7 +136,6 @@ creating build/bdist.linux-x86_64/wheel/tor_async_util-1.14.0.dist-info/WHEEL
 creating '/home/vagrant/tor-async-util/dist/tor_async_util-1.14.0-py2-none-any.whl' and adding '.' to it
 adding 'tor_async_util/__init__.py'
 adding 'tor_async_util/jsonschemas.py'
-adding 'tor_async_util/nose_plugins.py'
 adding 'tor_async_util/jsonschemas/get_health_response.json'
 adding 'tor_async_util/jsonschemas/get_noop_response.json'
 adding 'tor_async_util/jsonschemas/get_version_response.json'
@@ -164,7 +162,6 @@ copying setup.py -> tor_async_util-1.14.0
 copying bin/tor_async_util_nosetests.py -> tor_async_util-1.14.0/bin
 copying tor_async_util/__init__.py -> tor_async_util-1.14.0/tor_async_util
 copying tor_async_util/jsonschemas.py -> tor_async_util-1.14.0/tor_async_util
-copying tor_async_util/nose_plugins.py -> tor_async_util-1.14.0/tor_async_util
 copying tor_async_util.egg-info/PKG-INFO -> tor_async_util-1.14.0/tor_async_util.egg-info
 copying tor_async_util.egg-info/SOURCES.txt -> tor_async_util-1.14.0/tor_async_util.egg-info
 copying tor_async_util.egg-info/dependency_links.txt -> tor_async_util-1.14.0/tor_async_util.egg-info

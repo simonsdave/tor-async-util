@@ -15,7 +15,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Removed
 
-- Nothing
+- removed ```tor_async_util_nosetests``` given ```dev_env_nosetests.py``` exists
 
 ## [1.14.0] - [2018-02-19]
 
