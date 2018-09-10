@@ -6,7 +6,6 @@ install:
   - source cfg4dev
   - pip install coveralls
   - docker pull koalaman/shellcheck:latest
-  - shellcheck --version
 script:
   - run_pip_check.sh
   - run_flake8.sh
