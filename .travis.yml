@@ -9,7 +9,7 @@ install:
 script:
   - run_pip_check.sh
   - run_flake8.sh
-  - docker run -v "$PWD:/mnt" koalaman/shellcheck:latest $(find . -name \*.sh | grep -v \.\/env)
+  - run_shellcheck.sh -v
   - travis_fold start "build.python.packages"
   - python setup.py bdist_wheel sdist --formats=gztar
   - travis_fold end "build.python.packages"
