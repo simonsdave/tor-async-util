@@ -10,6 +10,8 @@ RUN apt-get install -y python-crypto
 RUN apt-get install -y libcurl4-openssl-dev
 RUN apt-get install -y libssl-dev
 
+COPY run_unit_tests.sh /usr/local/bin/run_unit_tests.sh
+
 COPY requirements.txt /tmp/requirements.txt
 COPY setup.py /tmp/setup.py
 RUN mkdir /tmp/tor_async_util
