@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
+set -x
 
 if [ $# != 2 ]; then
     echo "usage: $(basename "$0") <user> <group>" >&2
