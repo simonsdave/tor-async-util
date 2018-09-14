@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 set -e
-set -x
 
 SCRIPT_DIR_NAME="$( cd "$( dirname "$0" )" && pwd )"
 
