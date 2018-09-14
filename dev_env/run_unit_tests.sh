@@ -14,7 +14,7 @@ nosetests \
     --with-coverage \
     --cover-erase \
     --cover-branches \
-    --cover-package tor_async_util
+    --cover-package=tor_async_util
 
 chown "$USER.$GROUP" /app/.coverage
 
