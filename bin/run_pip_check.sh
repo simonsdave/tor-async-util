@@ -7,6 +7,6 @@ if [ $# != 0 ]; then
     exit 1
 fi
 
-docker run --rm --volume ~/tor-async-util:/app simonsdave/tor-async-util-dev-env:latest pip check
+docker run --rm --volume "$DEV_ENV_SOURCE_CODE:/app" "$DEV_ENV_DOCKER_IMAGE" pip check
 
 exit 0

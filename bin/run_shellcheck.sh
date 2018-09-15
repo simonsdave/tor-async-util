@@ -22,12 +22,14 @@ if [ $# != 0 ]; then
     exit 1
 fi
 
-find . -name \*.sh | grep -v ./env | while IFS='' read -r FILENAME
+find "$DEV_ENV_SOURCE_CODE" -name \*.sh | grep -v ./env | while IFS='' read -r FILENAME
 do
     if [ "1" -eq "${VERBOSE:-0}" ]; then
         echo "$FILENAME"
     fi
-    docker run -v "$PWD:/mnt" koalaman/shellcheck:latest "$FILENAME"
+    MNT_DIR=$(dirname "$FILENAME")
+    MNT_FILE=$(basename "$FILENAME")
+    docker run -v "$MNT_DIR:/mnt" koalaman/shellcheck:latest "$MNT_FILE"
 done
 
 exit 0
