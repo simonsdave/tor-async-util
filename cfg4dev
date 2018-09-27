@@ -10,6 +10,8 @@ if [ -f "$PWD/requirements.txt" ]; then
         if ! which run_shellcheck.sh; then
             pip install dev-env
         fi
+
+        "$PWD/dev_env/build-docker-image.sh"
     fi
 
     export PATH=$PATH:"$PWD/bin"
@@ -19,8 +21,6 @@ if [ -f "$PWD/requirements.txt" ]; then
     export DEV_ENV_SOURCE_CODE=$PWD
     export DEV_ENV_DOCKER_IMAGE=simonsdave/tor-async-util-xenial-dev-env:build
     export DEV_ENV_PACKAGE=tor_async_util
-
-    "$PWD/dev_env/build-docker-image.sh"
 else
     echo "Must source this script from repo's root directory"
 fi
