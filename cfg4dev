@@ -5,6 +5,11 @@ if [ -f "$PWD/requirements.txt" ]; then
     else
         virtualenv env
         source "$PWD/env/bin/activate"
+
+        # this is really here so that travis will work 
+        if ! which run_shellcheck.sh; then
+            pip install dev-env
+        fi
     fi
 
     export PATH=$PATH:"$PWD/bin"
