@@ -8,7 +8,7 @@ if [ -f "$PWD/requirements.txt" ]; then
 
         # this is really here so that travis will work 
         if ! which run_shellcheck.sh; then
-            pip install dev-env
+            pip install git+https://github.com/simonsdave/dev-env.git@master
         fi
 
         "$PWD/dev_env/build-docker-image.sh"
