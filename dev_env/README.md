@@ -76,13 +76,20 @@ Configure the dev environment
 
 ```bash
 ~> cd tor-async-util/
+~/tor-async-util>
+```
+
+```bash
 ~/tor-async-util> source cfg4dev
 New python executable in env/bin/python
 Installing setuptools, pip...done.
 .
 .
 .
-Cleaning up...
+Removing intermediate container b1177e01089a
+ ---> 768381b1bf25
+Successfully built 768381b1bf25
+Successfully tagged simonsdave/tor-async-util-xenial-dev-env:build
 (env)~/tor-async-util>
 ```
 
@@ -99,7 +106,7 @@ tor_async_util/jsonschemas.py       9      0      0      0   100%
 -----------------------------------------------------------------
 TOTAL                             351      0     74      0   100%
 ----------------------------------------------------------------------
-Ran 83 tests in 0.853s
+Ran 83 tests in 1.056s
 
 OK
 (env)~/tor-async-util>
