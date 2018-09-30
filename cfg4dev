@@ -19,7 +19,7 @@ if [ -f "$PWD/requirements.txt" ]; then
 
     # per guidelines in https://github.com/simonsdave/dev-env
     export DEV_ENV_SOURCE_CODE=$PWD
-    export DEV_ENV_DOCKER_IMAGE=simonsdave/tor-async-util-xenial-dev-env:build
+    export DEV_ENV_DOCKER_IMAGE=$(cat dev_env/dev-env-dockerimage.txt)
     export DEV_ENV_PACKAGE=tor_async_util
 else
     echo "Must source this script from repo's root directory"
