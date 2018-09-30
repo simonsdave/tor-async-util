@@ -12,4 +12,5 @@ fi
 DEV_ENV_VERSION=$(cat "$SCRIPT_DIR_NAME/dev-env-version.txt")
 
 curl -s "https://raw.githubusercontent.com/simonsdave/dev-env/$DEV_ENV_VERSION/ubuntu/xenial/create_dev_env.sh" | bash -s -- "$@"
-exit $?
+
+exit 0

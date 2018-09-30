@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 #
-# This script ...
+# This script builds a docker image which packages up the
+# development environment and associated tooling.
 #
 
 set -e
 
 SCRIPT_DIR_NAME="$( cd "$( dirname "$0" )" && pwd )"
 
-if [ $# != 0 ]; then
-    echo "usage: $(basename "$0")" >&2
+if [ $# != 1 ]; then
+    echo "usage: $(basename "$0") <docker image name>" >&2
     exit 1
 fi
+
+DOCKER_IMAGE=${1:-}
 
 CONTEXT_DIR=$(mktemp -d 2> /dev/null || mktemp -d -t DAS)
 PROJECT_HOME_DIR="$SCRIPT_DIR_NAME/.."
@@ -22,13 +25,11 @@ cp "$PROJECT_HOME_DIR/tor_async_util/__init__.py" "$CONTEXT_DIR/tor_async_util/.
 DEV_ENV_VERSION=$(cat "$SCRIPT_DIR_NAME/dev-env-version.txt")
 
 TEMP_DOCKERFILE=$(mktemp)
-cp "$SCRIPT_DIR_NAME/Dockerfile" "$TEMP_DOCKERFILE"
+cp "$SCRIPT_DIR_NAME/Dockerfile.template" "$TEMP_DOCKERFILE"
 sed \
     -i \
     -e "s|%DEV_ENV_VERSION%|$DEV_ENV_VERSION|g" \
     "$TEMP_DOCKERFILE"
-
-DOCKER_IMAGE=$(cat "$SCRIPT_DIR_NAME/dev-env-dockerimage.txt")
 
 docker build \
     -t "$DOCKER_IMAGE" \

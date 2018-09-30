@@ -1,4 +1,9 @@
 if [ -f "$PWD/requirements.txt" ]; then
+    # per guidelines in https://github.com/simonsdave/dev-env
+    export DEV_ENV_SOURCE_CODE=$PWD
+    export DEV_ENV_DOCKER_IMAGE="simonsdave/tor-async-util-xenial-dev-env:build"
+    export DEV_ENV_PACKAGE=tor_async_util
+
     # :TODO: do we actually need to be using virtualenv anymore?
     if [ -d "$PWD/env" ]; then
         source "$PWD/env/bin/activate"
@@ -11,16 +16,11 @@ if [ -f "$PWD/requirements.txt" ]; then
             pip install git+https://github.com/simonsdave/dev-env.git@master
         fi
 
-        "$PWD/dev_env/build-docker-image.sh"
+        "$PWD/dev_env/build-docker-image.sh" "$DEV_ENV_DOCKER_IMAGE"
     fi
 
     export PATH=$PATH:"$PWD/bin"
     export PYTHONPATH="$PWD"
-
-    # per guidelines in https://github.com/simonsdave/dev-env
-    export DEV_ENV_SOURCE_CODE=$PWD
-    export DEV_ENV_DOCKER_IMAGE=$(cat dev_env/dev-env-dockerimage.txt)
-    export DEV_ENV_PACKAGE=tor_async_util
 else
     echo "Must source this script from repo's root directory"
 fi
