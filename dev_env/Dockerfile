@@ -1,4 +1,4 @@
-FROM simonsdave/xenial-dev-env:latest
+FROM simonsdave/xenial-dev-env:%DEV_ENV_VERSION%
 
 MAINTAINER Dave Simons
 

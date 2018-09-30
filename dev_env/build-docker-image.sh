@@ -19,11 +19,20 @@ cp "$PROJECT_HOME_DIR/setup.py" "$CONTEXT_DIR/."
 mkdir "$CONTEXT_DIR/tor_async_util"
 cp "$PROJECT_HOME_DIR/tor_async_util/__init__.py" "$CONTEXT_DIR/tor_async_util/."
 
-IMAGE_NAME="simonsdave/tor-async-util-xenial-dev-env:build"
+DEV_ENV_VERSION=$(cat "$SCRIPT_DIR_NAME/dev-env-version.txt")
+
+TEMP_DOCKERFILE=$(mktemp)
+cp "$SCRIPT_DIR_NAME/Dockerfile" "$TEMP_DOCKERFILE"
+sed \
+    -i \
+    -e "s|%DEV_ENV_VERSION%|$DEV_ENV_VERSION|g" \
+    "$TEMP_DOCKERFILE"
+
+DOCKER_IMAGE=$(cat "$SCRIPT_DIR_NAME/dev-env-dockerimage.txt")
 
 docker build \
-    -t "$IMAGE_NAME" \
-    --file "$SCRIPT_DIR_NAME/Dockerfile" \
+    -t "$DOCKER_IMAGE" \
+    --file "$TEMP_DOCKERFILE" \
     "$CONTEXT_DIR"
 
 rm -rf "$CONTEXT_DIR"
