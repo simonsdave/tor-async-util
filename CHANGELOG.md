@@ -12,7 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - twine 1.10.0 -> 1.11.0
-- tornado <5.0.0 -> >=4.0.0
+- specification of the tornado version removed from setup.py so that consuming packages now need to specify
 
 ### Removed
 

@@ -90,7 +90,6 @@ setup(
         "jsonschema>=2.5.0",
         "python-keyczar==0.716",
         "pycurl>=7.43",
-        "tornado>=4.0.0",
     ],
     include_package_data=True,
     version=version,
