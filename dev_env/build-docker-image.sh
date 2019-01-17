@@ -23,6 +23,9 @@ mkdir "$CONTEXT_DIR/tor_async_util"
 cp "$PROJECT_HOME_DIR/tor_async_util/__init__.py" "$CONTEXT_DIR/tor_async_util/."
 
 DEV_ENV_VERSION=$(cat "$SCRIPT_DIR_NAME/dev-env-version.txt")
+if [ "${DEV_ENV_VERSION:-}" == "master" ]; then
+    DEV_ENV_VERSION=latest
+fi
 
 TEMP_DOCKERFILE=$CONTEXT_DIR/Dockerfile
 cp "$SCRIPT_DIR_NAME/Dockerfile.template" "$TEMP_DOCKERFILE"
