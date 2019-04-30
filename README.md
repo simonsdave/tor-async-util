@@ -1,12 +1,15 @@
 # tor-async-util
-![Maintained](https://img.shields.io/maintenance/yes/2019.svg?style=flat)
+![Maintained](https://img.shields.io/maintenance/no/2018.svg?style=flat)
 ![license](https://img.shields.io/pypi/l/tor-async-util.svg?style=flat)
 ![PythonVersions](https://img.shields.io/pypi/pyversions/tor-async-util.svg?style=flat)
 ![status](https://img.shields.io/pypi/status/tor-async-util.svg?style=flat)
 [![PyPI](https://img.shields.io/pypi/v/tor-async-util.svg?style=flat)](https://pypi.python.org/pypi/tor-async-util)
-[![Requirements Status](https://requires.io/github/simonsdave/tor-async-util/requirements.svg?branch=master)](https://requires.io/github/simonsdave/tor-async-util/requirements/?branch=master)
 [![Build Status](https://travis-ci.org/simonsdave/tor-async-util.svg?branch=master)](https://travis-ci.org/simonsdave/tor-async-util)
 [![Coverage Status](https://coveralls.io/repos/simonsdave/tor-async-util/badge.svg?branch=master&service=github)](https://coveralls.io/github/simonsdave/tor-async-util?branch=master)
+
+```
+Repo Status = as of EO '18 this repo is no longer being maintained.
+```
 
 tor-async-util is a set of utilities that are useful
 when implementing RESTful APIs using [Tornado's](http://www.tornadoweb.org/en/stable/)
